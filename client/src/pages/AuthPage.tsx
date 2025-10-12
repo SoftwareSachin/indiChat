@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type LanguageCode, SUPPORTED_LANGUAGES } from "@/lib/languages";
+import { Separator } from "@/components/ui/separator";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
@@ -43,11 +44,17 @@ export default function AuthPage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       toast({
-        title: isLogin ? "Welcome back!" : "Account created!",
+        title: isLogin ? "Welcome back" : "Account created",
         description: `Logged in as ${data.user.username}`,
       });
 
-      setLocation("/rooms");
+      const pendingInvite = localStorage.getItem("pendingInvite");
+      if (pendingInvite) {
+        localStorage.removeItem("pendingInvite");
+        setLocation(`/invite/${pendingInvite}`);
+      } else {
+        setLocation("/rooms");
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -62,12 +69,14 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{isLogin ? "Login" : "Create Account"}</CardTitle>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-semibold tracking-tight">
+            {isLogin ? "Sign in" : "Create account"}
+          </CardTitle>
           <CardDescription>
             {isLogin 
               ? "Enter your credentials to access your chat rooms" 
-              : "Create an account to start chatting"}
+              : "Create an account to start chatting with real-time translation"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,6 +90,7 @@ export default function AuthPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
                 required
+                autoComplete="username"
               />
             </div>
             
@@ -93,6 +103,7 @@ export default function AuthPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
+                autoComplete={isLogin ? "current-password" : "new-password"}
               />
             </div>
 
@@ -115,8 +126,10 @@ export default function AuthPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : (isLogin ? "Login" : "Create Account")}
+              {isLoading ? "Loading..." : (isLogin ? "Sign in" : "Create account")}
             </Button>
+
+            <Separator />
 
             <Button
               type="button"
@@ -124,7 +137,7 @@ export default function AuthPage() {
               className="w-full"
               onClick={() => setIsLogin(!isLogin)}
             >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </Button>
           </form>
         </CardContent>

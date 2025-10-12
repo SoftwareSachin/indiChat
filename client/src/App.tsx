@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import AuthPage from "@/pages/AuthPage";
 import RoomsPage from "@/pages/RoomsPage";
 import ChatPage from "@/pages/ChatPage";
+import InvitePage from "@/pages/InvitePage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/rooms" component={RoomsPage} />
       <Route path="/chat/:roomId" component={ChatPage} />
+      <Route path="/invite/:inviteCode" component={InvitePage} />
       <Route component={NotFound} />
     </Switch>
   );

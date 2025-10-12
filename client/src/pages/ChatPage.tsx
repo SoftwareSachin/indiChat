@@ -87,16 +87,18 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex items-center gap-2 p-2 border-b">
-        <Button variant="ghost" size="icon" onClick={() => setLocation("/rooms")}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div className="flex-1">
-          <ChatHeader
-            connectionStatus={connectionStatus}
-            selectedLanguage={selectedLanguage}
-            onLanguageChange={handleLanguageChange}
-          />
+      <div className="border-b bg-card">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/rooms")}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div className="flex-1">
+            <ChatHeader
+              connectionStatus={connectionStatus}
+              selectedLanguage={selectedLanguage}
+              onLanguageChange={handleLanguageChange}
+            />
+          </div>
         </div>
       </div>
 

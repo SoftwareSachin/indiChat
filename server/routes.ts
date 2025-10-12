@@ -160,6 +160,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       language: string; 
       roomId: string;
     }) => {
+      const isMember = await storage.isRoomMember(data.roomId, data.userId);
+      
+      if (!isMember) {
+        socket.emit("error", { message: "Not authorized to join this room" });
+        return;
+      }
+      
       connectedUsers.set(socket.id, { 
         id: data.userId, 
         username: data.username, 
@@ -185,6 +192,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       originalLanguage: string;
     }) => {
       try {
+        const isMember = await storage.isRoomMember(data.roomId, data.userId);
+        
+        if (!isMember) {
+          socket.emit("message:error", { error: "Not authorized to send messages in this room" });
+          return;
+        }
+        
         const message = await storage.createMessage({
           userId: data.userId,
           roomId: data.roomId,
