@@ -128,6 +128,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       socket.broadcast.emit("user:stop-typing", data);
     });
 
+    socket.on("user:language-change", (data: { userId: string; language: string }) => {
+      const user = connectedUsers.get(socket.id);
+      if (user) {
+        user.language = data.language;
+        connectedUsers.set(socket.id, user);
+      }
+    });
+
     socket.on("disconnect", () => {
       const user = connectedUsers.get(socket.id);
       if (user) {

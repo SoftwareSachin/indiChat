@@ -10,6 +10,9 @@ export function useChat(userId: string, username: string, language: LanguageCode
   const speechRecognition = useRef<SpeechRecognitionService | null>(null);
   const textToSpeech = useRef(new TextToSpeechService());
   const typingTimeout = useRef<NodeJS.Timeout>();
+  const currentLanguageRef = useRef(language);
+  const userIdRef = useRef(userId);
+  const usernameRef = useRef(username);
   
   const {
     setConnectionStatus,
@@ -24,47 +27,57 @@ export function useChat(userId: string, username: string, language: LanguageCode
   const [isRecording, setIsRecording] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
 
+  // Keep refs updated with latest values
   useEffect(() => {
-    setUser({ id: userId, username, language });
+    currentLanguageRef.current = language;
+    userIdRef.current = userId;
+    usernameRef.current = username;
+  }, [language, userId, username]);
 
-    // Initialize speech recognition
-    try {
-      speechRecognition.current = new SpeechRecognitionService(language);
-    } catch (error) {
-      console.error("Speech recognition not available:", error);
-    }
-
-    // WebSocket event listeners
+  // Initialize socket listeners once
+  useEffect(() => {
     const s = socket.current;
 
-    s.on("connect", () => {
+    const handleConnect = () => {
       setConnectionStatus("connected");
-      s.emit("user:join", { userId, username, language });
-    });
+      s.emit("user:join", { 
+        userId: userIdRef.current, 
+        username: usernameRef.current, 
+        language: currentLanguageRef.current 
+      });
+    };
 
-    s.on("disconnect", () => {
+    const handleDisconnect = () => {
       setConnectionStatus("disconnected");
-    });
+    };
 
-    s.on("messages:history", (messages: Message[]) => {
+    const handleMessagesHistory = (messages: Message[]) => {
       setMessages(messages);
-    });
+    };
 
-    s.on("message:new", (message: Message) => {
+    const handleMessageNew = (message: Message) => {
       addMessage(message);
-    });
+    };
 
-    s.on("message:translated", (data: { messageId: string; translatedContent: string; targetLanguage: string }) => {
+    const handleMessageTranslated = (data: { messageId: string; translatedContent: string; targetLanguage: string }) => {
       addTranslation(data.messageId, data.translatedContent, data.targetLanguage);
-    });
+    };
 
-    s.on("user:typing", (data: { userId: string; username: string }) => {
+    const handleUserTyping = (data: { userId: string; username: string }) => {
       setUserTyping(data.userId, data.username);
-    });
+    };
 
-    s.on("user:stop-typing", (data: { userId: string }) => {
+    const handleUserStopTyping = (data: { userId: string }) => {
       removeUserTyping(data.userId);
-    });
+    };
+
+    s.on("connect", handleConnect);
+    s.on("disconnect", handleDisconnect);
+    s.on("messages:history", handleMessagesHistory);
+    s.on("message:new", handleMessageNew);
+    s.on("message:translated", handleMessageTranslated);
+    s.on("user:typing", handleUserTyping);
+    s.on("user:stop-typing", handleUserStopTyping);
 
     if (!s.connected) {
       setConnectionStatus("connecting");
@@ -72,10 +85,35 @@ export function useChat(userId: string, username: string, language: LanguageCode
     }
 
     return () => {
+      s.off("connect", handleConnect);
+      s.off("disconnect", handleDisconnect);
+      s.off("messages:history", handleMessagesHistory);
+      s.off("message:new", handleMessageNew);
+      s.off("message:translated", handleMessageTranslated);
+      s.off("user:typing", handleUserTyping);
+      s.off("user:stop-typing", handleUserStopTyping);
+      
       if (typingTimeout.current) {
         clearTimeout(typingTimeout.current);
       }
     };
+  }, []);
+
+  // Update user info and notify server when language changes
+  useEffect(() => {
+    setUser({ id: userId, username, language });
+    
+    // Initialize speech recognition with current language
+    try {
+      speechRecognition.current = new SpeechRecognitionService(language);
+    } catch (error) {
+      console.error("Speech recognition not available:", error);
+    }
+
+    // Notify server of language change if connected
+    if (socket.current.connected) {
+      socket.current.emit("user:language-change", { userId, language });
+    }
   }, [userId, username, language]);
 
   const sendMessage = (content: string) => {
