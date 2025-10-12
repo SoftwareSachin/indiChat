@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type Message, type InsertMessage } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { type User, type InsertUser, type Message, type InsertMessage, users, messages } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -14,74 +15,59 @@ export interface IStorage {
   getMessagesByUser(userId: string): Promise<Message[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private messages: Map<string, Message>;
-
-  constructor() {
-    this.users = new Map();
-    this.messages = new Map();
-  }
-
+export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
+    const [user] = await db.insert(users).values({
+      username: insertUser.username,
       preferredLanguage: insertUser.preferredLanguage || 'en'
-    };
-    this.users.set(id, user);
+    }).returning();
     return user;
   }
 
   async updateUserLanguage(id: string, language: string): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (user) {
-      user.preferredLanguage = language;
-      this.users.set(id, user);
-      return user;
-    }
-    return undefined;
+    const [user] = await db.update(users)
+      .set({ preferredLanguage: language })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = randomUUID();
-    const message: Message = {
-      id,
+    const [message] = await db.insert(messages).values({
       userId: insertMessage.userId,
       content: insertMessage.content,
       translatedContent: insertMessage.translatedContent || null,
       originalLanguage: insertMessage.originalLanguage,
       targetLanguage: insertMessage.targetLanguage || null,
-      timestamp: new Date(),
-    };
-    this.messages.set(id, message);
+    }).returning();
     return message;
   }
 
   async getMessages(limit: number = 50): Promise<Message[]> {
-    const messages = Array.from(this.messages.values());
-    messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-    return messages.slice(-limit);
+    const result = await db.select()
+      .from(messages)
+      .orderBy(desc(messages.timestamp))
+      .limit(limit);
+    
+    return result.reverse();
   }
 
   async getMessagesByUser(userId: string): Promise<Message[]> {
-    const messages = Array.from(this.messages.values()).filter(
-      (msg) => msg.userId === userId
-    );
-    messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-    return messages;
+    return await db.select()
+      .from(messages)
+      .where(eq(messages.userId, userId))
+      .orderBy(messages.timestamp);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DbStorage();
