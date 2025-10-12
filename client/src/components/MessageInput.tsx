@@ -10,6 +10,7 @@ interface MessageInputProps {
   onStopVoiceInput?: () => void;
   isRecording?: boolean;
   placeholder?: string;
+  onTyping?: () => void;
 }
 
 export function MessageInput({
@@ -18,6 +19,7 @@ export function MessageInput({
   onStopVoiceInput,
   isRecording = false,
   placeholder = "Type a message...",
+  onTyping,
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
 
@@ -40,7 +42,10 @@ export function MessageInput({
       <div className="flex-1 relative">
         <Textarea
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            onTyping?.();
+          }}
           onKeyDown={handleKeyPress}
           placeholder={placeholder}
           className="resize-none min-h-[52px] max-h-32 pr-12"

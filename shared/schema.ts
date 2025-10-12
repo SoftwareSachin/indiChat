@@ -20,6 +20,13 @@ export const chatRooms = pgTable("chat_rooms", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const roomMembers = pgTable("room_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  roomId: varchar("room_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+});
+
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
@@ -61,5 +68,6 @@ export type User = typeof users.$inferSelect;
 export type LoginCredentials = z.infer<typeof loginSchema>;
 export type InsertRoom = z.infer<typeof insertRoomSchema>;
 export type ChatRoom = typeof chatRooms.$inferSelect;
+export type RoomMember = typeof roomMembers.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;

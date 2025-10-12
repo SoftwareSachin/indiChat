@@ -5,7 +5,7 @@ import { type Message } from "@shared/schema";
 import { SpeechRecognitionService, TextToSpeechService } from "@/lib/speech";
 import { type LanguageCode } from "@/lib/languages";
 
-export function useChat(userId: string, username: string, language: LanguageCode) {
+export function useChat(userId: string, username: string, language: LanguageCode, roomId: string) {
   const socket = useRef(getSocket());
   const speechRecognition = useRef<SpeechRecognitionService | null>(null);
   const textToSpeech = useRef(new TextToSpeechService());
@@ -13,6 +13,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
   const currentLanguageRef = useRef(language);
   const userIdRef = useRef(userId);
   const usernameRef = useRef(username);
+  const roomIdRef = useRef(roomId);
   
   const {
     setConnectionStatus,
@@ -32,7 +33,8 @@ export function useChat(userId: string, username: string, language: LanguageCode
     currentLanguageRef.current = language;
     userIdRef.current = userId;
     usernameRef.current = username;
-  }, [language, userId, username]);
+    roomIdRef.current = roomId;
+  }, [language, userId, username, roomId]);
 
   // Initialize socket listeners once
   useEffect(() => {
@@ -40,10 +42,11 @@ export function useChat(userId: string, username: string, language: LanguageCode
 
     const handleConnect = () => {
       setConnectionStatus("connected");
-      s.emit("user:join", { 
+      s.emit("room:join", { 
         userId: userIdRef.current, 
         username: usernameRef.current, 
-        language: currentLanguageRef.current 
+        language: currentLanguageRef.current,
+        roomId: roomIdRef.current
       });
     };
 
@@ -119,23 +122,24 @@ export function useChat(userId: string, username: string, language: LanguageCode
   const sendMessage = (content: string) => {
     socket.current.emit("message:send", {
       userId,
+      roomId,
       content,
       originalLanguage: language,
     });
     
     // Stop typing indicator
-    socket.current.emit("user:stop-typing", { userId });
+    socket.current.emit("user:stop-typing", { userId, roomId });
   };
 
   const notifyTyping = () => {
-    socket.current.emit("user:typing", { userId, username });
+    socket.current.emit("user:typing", { userId, username, roomId });
     
     if (typingTimeout.current) {
       clearTimeout(typingTimeout.current);
     }
     
     typingTimeout.current = setTimeout(() => {
-      socket.current.emit("user:stop-typing", { userId });
+      socket.current.emit("user:stop-typing", { userId, roomId });
     }, 2000);
   };
 
