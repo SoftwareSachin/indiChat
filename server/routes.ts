@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("User connected:", socket.id);
 
     socket.on("user:join", async (data: { userId: string; username: string; language: string }) => {
-      connectedUsers.set(socket.id, data);
+      connectedUsers.set(socket.id, { id: data.userId, username: data.username, language: data.language });
       
       // Broadcast user joined
       io.emit("user:joined", {
@@ -94,7 +94,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         io.emit("message:new", message);
 
         // Translate for other users if needed
-        for (const [clientId, user] of connectedUsers.entries()) {
+        const connectedUsersArray = Array.from(connectedUsers.entries());
+        for (const [clientId, user] of connectedUsersArray) {
           if (user.language !== data.originalLanguage) {
             try {
               const translated = await translateText(
