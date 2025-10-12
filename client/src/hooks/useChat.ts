@@ -97,7 +97,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
         clearTimeout(typingTimeout.current);
       }
     };
-  }, []);
+  }, [setConnectionStatus, setMessages, addMessage, addTranslation, setUserTyping, removeUserTyping]);
 
   // Update user info and notify server when language changes
   useEffect(() => {
@@ -114,7 +114,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
     if (socket.current.connected) {
       socket.current.emit("user:language-change", { userId, language });
     }
-  }, [userId, username, language]);
+  }, [userId, username, language, setUser]);
 
   const sendMessage = (content: string) => {
     socket.current.emit("message:send", {
