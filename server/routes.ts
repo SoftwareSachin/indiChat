@@ -34,7 +34,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         token 
       });
     } catch (error) {
-      res.status(400).json({ error: "Invalid user data" });
+      console.error("Registration error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Invalid user data";
+      res.status(400).json({ error: errorMessage });
     }
   });
 
