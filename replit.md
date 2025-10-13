@@ -1,10 +1,29 @@
-# BharatChat - Multilingual Chat Platform
+# BharatChat - Global Multilingual Chat Platform
 
 ## Overview
 
-BharatChat is a real-time multilingual chat platform designed specifically for Indian regional languages. The application enables users to communicate across language barriers by providing instant translation, speech-to-text input, and text-to-speech output. It supports six major Indian languages: English, Hindi, Tamil, Telugu, Bengali, and Marathi.
+BharatChat is a real-time multilingual chat platform that enables users to communicate across language barriers by providing instant translation, speech-to-text input, and text-to-speech output. It supports **12 major languages**: English, Spanish, French, German, Chinese, Japanese, Hindi, Arabic, Tamil, Telugu, Bengali, and Marathi.
 
-The platform leverages modern web technologies to deliver a WhatsApp-like chat experience with AI-powered translation capabilities, making cross-lingual communication seamless and accessible.
+The platform leverages modern web technologies and Google Gemini AI to deliver a WhatsApp-like chat experience with AI-powered translation capabilities, making cross-lingual communication seamless and accessible worldwide.
+
+## Recent Updates (October 2025)
+
+### 12-Language Support
+- **Expanded from 6 to 12 languages** with full support for:
+  - European languages: English, Spanish, French, German
+  - Asian languages: Chinese (Simplified), Japanese, Hindi, Arabic
+  - Indian regional languages: Tamil, Telugu, Bengali, Marathi
+
+### Four Communication Modes
+1. **Text-to-Text**: AI-powered translation using Google Gemini 2.5 Flash
+2. **Speech-to-Text**: Browser-native speech recognition for all 12 languages
+3. **Text-to-Speech**: Automatic voice synthesis with language-specific voices
+4. **Speech-to-Speech**: Complete voice translation pipeline across languages
+
+### Bug Fixes
+- Fixed copy invite code and copy link functionality with proper async/await handling
+- Implemented session management to prevent cross-tab logout issues
+- Added warning notifications when sessions are replaced by other users
 
 ## User Preferences
 
