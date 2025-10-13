@@ -66,28 +66,106 @@ export async function detectLanguage(text: string): Promise<string> {
   }
 }
 
-// Text-to-speech using Gemini (for higher quality audio in supported languages)
-export async function generateSpeech(text: string, languageCode: string): Promise<string> {
+// Speech-to-text using Gemini (audio transcription)
+export async function transcribeSpeech(audioData: Buffer, languageCode: string, mimeType: string = 'audio/webm'): Promise<string> {
   try {
-    // Note: Gemini 2.5 Flash supports text input only. 
-    // For actual TTS, we'll use the browser's native speech synthesis
-    // This function can be extended when Gemini adds TTS support
-    return text;
+    const languageNames: Record<string, string> = {
+      hi: "Hindi",
+      bn: "Bengali",
+      te: "Telugu",
+      mr: "Marathi",
+      ta: "Tamil",
+      gu: "Gujarati",
+      ur: "Urdu",
+      kn: "Kannada",
+      or: "Odia",
+      ml: "Malayalam",
+      pa: "Punjabi",
+      as: "Assamese",
+    };
+
+    const language = languageNames[languageCode] || "Hindi";
+    
+    console.log(`🎤 GEMINI AUDIO TRANSCRIPTION: ${language}, mime: ${mimeType}`);
+
+    const prompt = `Transcribe this audio in ${language}. Provide only the transcribed text, no explanations.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        prompt,
+        {
+          inlineData: {
+            data: audioData.toString('base64'),
+            mimeType: mimeType,
+          }
+        }
+      ],
+    });
+
+    const transcribedText = response.text?.trim() || "";
+    console.log(`✅ GEMINI TRANSCRIPTION: "${transcribedText.substring(0, 50)}..."`);
+    
+    return transcribedText;
   } catch (error) {
-    console.error("Speech generation error:", error);
-    throw new Error(`Failed to generate speech: ${error}`);
+    console.error("❌ GEMINI TRANSCRIPTION ERROR:", error);
+    throw new Error(`Failed to transcribe speech: ${error}`);
   }
 }
 
-// Speech-to-text using Gemini (for improved accuracy with context)
-export async function transcribeSpeech(audioData: string, languageCode: string): Promise<string> {
+// Text-to-speech using Gemini (native audio synthesis)
+export async function generateSpeech(text: string, languageCode: string): Promise<Buffer> {
   try {
-    // Note: Gemini 2.5 Flash supports text input only
-    // For actual STT, we'll use the browser's native speech recognition
-    // This function can be extended when Gemini adds audio input support
-    return "";
+    const languageNames: Record<string, string> = {
+      hi: "Hindi",
+      bn: "Bengali", 
+      te: "Telugu",
+      mr: "Marathi",
+      ta: "Tamil",
+      gu: "Gujarati",
+      ur: "Urdu",
+      kn: "Kannada",
+      or: "Odia",
+      ml: "Malayalam",
+      pa: "Punjabi",
+      as: "Assamese",
+    };
+
+    const language = languageNames[languageCode] || "Hindi";
+    
+    console.log(`🔊 GEMINI TTS GENERATION: "${text.substring(0, 50)}..." in ${language}`);
+
+    const prompt = `Generate natural speech in ${language} for this text: ${text}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: 'Kore'
+            }
+          }
+        }
+      }
+    });
+
+    const audioPart = response.candidates?.[0]?.content?.parts?.find(
+      (part: any) => part.inlineData?.mimeType?.startsWith('audio/')
+    );
+
+    if (!audioPart?.inlineData?.data) {
+      throw new Error("No audio data in response");
+    }
+
+    const audioBuffer = Buffer.from(audioPart.inlineData.data, 'base64');
+    console.log(`✅ GEMINI TTS: Generated ${audioBuffer.length} bytes of audio`);
+    
+    return audioBuffer;
   } catch (error) {
-    console.error("Transcription error:", error);
-    throw new Error(`Failed to transcribe speech: ${error}`);
+    console.error("❌ GEMINI TTS ERROR:", error);
+    throw new Error(`Failed to generate speech: ${error}`);
   }
 }

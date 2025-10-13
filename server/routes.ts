@@ -2,10 +2,16 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { Server as SocketServer } from "socket.io";
 import { storage } from "./storage";
-import { translateText, detectLanguage } from "./services/gemini";
+import { translateText, detectLanguage, transcribeSpeech, generateSpeech } from "./services/gemini";
 import { insertMessageSchema, insertUserSchema, loginSchema, insertRoomSchema } from "@shared/schema";
 import { generateToken, comparePassword, authMiddleware } from "./auth";
 import crypto from "crypto";
+import multer from "multer";
+
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
@@ -142,6 +148,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ language });
     } catch (error) {
       res.status(500).json({ error: "Language detection failed" });
+    }
+  });
+
+  // Audio Routes
+  app.post("/api/transcribe-audio", authMiddleware, upload.single('audio'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No audio file provided" });
+      }
+
+      const { language } = req.body;
+      const mimeType = req.file.mimetype;
+      
+      console.log(`📤 Received audio for transcription: ${req.file.size} bytes, ${mimeType}, language: ${language}`);
+
+      const transcribedText = await transcribeSpeech(req.file.buffer, language, mimeType);
+      
+      res.json({ text: transcribedText });
+    } catch (error) {
+      console.error("Transcription error:", error);
+      res.status(500).json({ error: "Audio transcription failed" });
+    }
+  });
+
+  app.post("/api/generate-audio", authMiddleware, async (req, res) => {
+    try {
+      const { text, language } = req.body;
+      
+      if (!text || !language) {
+        return res.status(400).json({ error: "Text and language are required" });
+      }
+
+      console.log(`🔊 Generating audio for: "${text.substring(0, 50)}..." in ${language}`);
+
+      const audioBuffer = await generateSpeech(text, language);
+      
+      // Send audio as base64 for easy frontend handling
+      res.json({ 
+        audio: audioBuffer.toString('base64'),
+        mimeType: 'audio/pcm;rate=24000'
+      });
+    } catch (error) {
+      console.error("Audio generation error:", error);
+      res.status(500).json({ error: "Audio generation failed" });
     }
   });
 
