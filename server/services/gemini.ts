@@ -3,7 +3,110 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+// API Key Rotation System - Load all 5 Gemini API keys
+const API_KEYS = [
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+  process.env.GEMINI_API_KEY_5,
+].filter(key => key && key.trim() !== '') as string[];
+
+// Track which keys are exhausted
+const exhaustedKeys = new Set<number>();
+let currentKeyIndex = 0;
+
+// Validate we have at least one API key
+if (API_KEYS.length === 0) {
+  throw new Error("No Gemini API keys found. Please set GEMINI_API_KEY_1 through GEMINI_API_KEY_5");
+}
+
+console.log(`🔑 Loaded ${API_KEYS.length} Gemini API key(s) for rotation`);
+
+// Get current AI client with active key, returning both client and the key index used
+function getAIClient(): { client: GoogleGenAI; keyIndex: number } {
+  return {
+    client: new GoogleGenAI({ apiKey: API_KEYS[currentKeyIndex] }),
+    keyIndex: currentKeyIndex
+  };
+}
+
+// Rotate to next available API key from a specific starting index
+function rotateToNextKey(fromIndex: number): boolean {
+  const startIndex = fromIndex;
+  let nextIndex = fromIndex;
+  
+  do {
+    nextIndex = (nextIndex + 1) % API_KEYS.length;
+    
+    if (!exhaustedKeys.has(nextIndex)) {
+      currentKeyIndex = nextIndex;
+      console.log(`🔄 Rotated to API key #${currentKeyIndex + 1} (from #${fromIndex + 1})`);
+      return true;
+    }
+    
+    // If we've checked all keys and they're all exhausted
+    if (nextIndex === startIndex) {
+      console.error("🚫 All API keys are quota exhausted!");
+      return false;
+    }
+  } while (nextIndex !== startIndex);
+  
+  return false;
+}
+
+// Mark specific key as exhausted and rotate from that key
+function handleQuotaExceeded(failedKeyIndex: number): boolean {
+  console.warn(`⚠️ API key #${failedKeyIndex + 1} quota exceeded, marking as exhausted`);
+  exhaustedKeys.add(failedKeyIndex);
+  return rotateToNextKey(failedKeyIndex);
+}
+
+// Check if error is quota-related
+function isQuotaError(error: any): boolean {
+  return (
+    error.status === 429 || 
+    error.code === 429 ||
+    error.message?.includes('quota') || 
+    error.message?.includes('RESOURCE_EXHAUSTED') ||
+    error.message?.includes('rate limit')
+  );
+}
+
+// Retry with key rotation on quota errors
+async function retryWithRotation<T>(
+  operation: (client: GoogleGenAI) => Promise<T>,
+  maxAttempts: number = API_KEYS.length
+): Promise<T> {
+  let lastError: any;
+  
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { client, keyIndex } = getAIClient();
+    
+    try {
+      return await operation(client);
+    } catch (error: any) {
+      lastError = error;
+      
+      if (isQuotaError(error)) {
+        // Use the keyIndex that was captured when the client was created
+        const rotated = handleQuotaExceeded(keyIndex);
+        
+        if (!rotated) {
+          throw new Error(`All ${API_KEYS.length} API keys have exceeded their quotas. Please wait or upgrade your plan.`);
+        }
+        
+        // Continue to next iteration with new key
+        continue;
+      }
+      
+      // If not a quota error, throw immediately
+      throw error;
+    }
+  }
+  
+  throw lastError;
+}
 
 export async function translateText(
   text: string,
@@ -33,9 +136,11 @@ export async function translateText(
 
     const prompt = `Translate the following text from ${sourceLanguage} to ${targetLanguage}. Provide only the translated text, maintaining the tone and context. Do not add explanations or notes:\n\n${text}`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await retryWithRotation(async (ai) => {
+      return await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
     });
 
     const translatedText = response.text?.trim() || text;
@@ -52,9 +157,11 @@ export async function detectLanguage(text: string): Promise<string> {
   try {
     const prompt = `Detect the language of this text and respond with only the ISO 639-1 language code. Valid codes are: hi (Hindi), bn (Bengali), te (Telugu), mr (Marathi), ta (Tamil), gu (Gujarati), ur (Urdu), kn (Kannada), or (Odia), ml (Malayalam), pa (Punjabi), as (Assamese). Text: ${text}`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    const response = await retryWithRotation(async (ai) => {
+      return await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
     });
 
     const detected = response.text?.trim().toLowerCase() || "hi";
@@ -90,21 +197,23 @@ export async function transcribeSpeech(audioData: Buffer, languageCode: string, 
 
     const prompt = `Transcribe this audio in ${language}. Provide only the transcribed text, no explanations.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                data: audioData.toString('base64'),
-                mimeType: mimeType,
+    const response = await retryWithRotation(async (ai) => {
+      return await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  data: audioData.toString('base64'),
+                  mimeType: mimeType,
+                }
               }
-            }
-          ]
-        }
-      ],
+            ]
+          }
+        ],
+      });
     });
 
     const transcribedText = response.text?.trim() || "";
@@ -188,23 +297,25 @@ export async function generateSpeech(text: string, languageCode: string): Promis
         // Improved prompt format
         const prompt = cleanedText;
 
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash-preview-tts",
-          contents: [
-            {
-              parts: [{ text: prompt }]
-            }
-          ],
-          config: {
-            responseModalities: ["AUDIO"],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: voiceName
+        const response = await retryWithRotation(async (ai) => {
+          return await ai.models.generateContent({
+            model: "gemini-2.5-flash-preview-tts",
+            contents: [
+              {
+                parts: [{ text: prompt }]
+              }
+            ],
+            config: {
+              responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: voiceName
+                  }
                 }
               }
             }
-          }
+          });
         });
 
         const audioPart = response.candidates?.[0]?.content?.parts?.find(
@@ -222,11 +333,12 @@ export async function generateSpeech(text: string, languageCode: string): Promis
         break; // Try next voice
         
       } catch (error: any) {
-        // Check if it's a quota error (429)
-        if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('RESOURCE_EXHAUSTED')) {
-          console.error(`🚫 GEMINI TTS QUOTA EXCEEDED: Free tier limit is 15 requests/day. Transcription and translation continue to work.`);
-          console.error(`💡 To enable TTS: Upgrade your Gemini API plan at https://ai.google.dev/pricing`);
-          throw new Error('TTS quota exceeded - upgrade API plan for unlimited TTS');
+        // Check if it's a quota error (429) - this is already handled by retryWithRotation
+        if (error.message?.includes('All') && error.message?.includes('API keys')) {
+          // All keys exhausted
+          console.error(`🚫 ALL GEMINI API KEYS EXHAUSTED`);
+          console.error(`💡 Please wait for quota reset or upgrade your Gemini API plan at https://ai.google.dev/pricing`);
+          throw error;
         }
 
         const isLastAttempt = attempt === maxRetries;
