@@ -142,7 +142,7 @@ export async function generateSpeech(text: string, languageCode: string): Promis
     const prompt = `Say this in ${language}: ${text}`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-preview-tts",
       contents: [
         {
           parts: [{ text: prompt }]
