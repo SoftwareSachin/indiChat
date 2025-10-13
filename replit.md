@@ -2,17 +2,18 @@
 
 ## Overview
 
-Xchat is a real-time multilingual chat platform that enables users to communicate across language barriers by providing instant translation, speech-to-text input, and text-to-speech output. It supports **12 major languages**: English, Spanish, French, German, Chinese, Japanese, Hindi, Arabic, Tamil, Telugu, Bengali, and Marathi.
+Xchat is a real-time multilingual chat platform that enables users to communicate across language barriers by providing instant translation, speech-to-text input, and text-to-speech output. It supports **12 Indian regional languages**: Hindi, Bengali, Telugu, Marathi, Tamil, Gujarati, Urdu, Kannada, Odia, Malayalam, Punjabi, and Assamese.
 
 The platform leverages modern web technologies and Google Gemini AI to deliver a WhatsApp-like chat experience with AI-powered translation capabilities, making cross-lingual communication seamless and accessible worldwide.
 
 ## Recent Updates (October 2025)
 
-### 12-Language Support
-- **Expanded from 6 to 12 languages** with full support for:
-  - European languages: English, Spanish, French, German
-  - Asian languages: Chinese (Simplified), Japanese, Hindi, Arabic
-  - Indian regional languages: Tamil, Telugu, Bengali, Marathi
+### 12 Indian Regional Languages Support
+- **Supports 12 major Indian regional languages**:
+  - Hindi (हिन्दी), Bengali (বাংলা), Telugu (తెలుగు)
+  - Marathi (मराठी), Tamil (தமிழ்), Gujarati (ગુજરાતી)
+  - Urdu (اردو), Kannada (ಕನ್ನಡ), Odia (ଓଡ଼ିଆ)
+  - Malayalam (മലയാളം), Punjabi (ਪੰਜਾਬੀ), Assamese (অসমীয়া)
 
 ### Four Communication Modes
 1. **Text-to-Text**: AI-powered translation using Google Gemini 2.5 Flash
