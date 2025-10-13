@@ -63,6 +63,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
     };
 
     const handleMessageTranslated = (data: { messageId: string; translatedContent: string; targetLanguage: string }) => {
+      console.log(`📥 RECEIVED TRANSLATION from Gemini: "${data.translatedContent.substring(0, 50)}..." in ${data.targetLanguage}`);
       addTranslation(data.messageId, data.translatedContent, data.targetLanguage);
     };
 
@@ -149,10 +150,13 @@ export function useChat(userId: string, username: string, language: LanguageCode
       return;
     }
 
+    console.log(`🎤 VOICE INPUT STARTED: Language ${language}`);
     speechRecognition.current.setLanguage(language);
     speechRecognition.current.start(
       (text, isFinal) => {
         if (isFinal) {
+          console.log(`✅ VOICE TRANSCRIBED: "${text}" in ${language}`);
+          console.log(`📤 SENDING to server for Gemini translation...`);
           sendMessage(text);
           setInterimTranscript("");
           setIsRecording(false);
@@ -161,7 +165,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
         }
       },
       (error) => {
-        console.error("Speech recognition error:", error);
+        console.error("❌ Speech recognition error:", error);
         setIsRecording(false);
       }
     );
@@ -176,6 +180,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
   };
 
   const playAudio = (text: string, languageCode: string) => {
+    console.log(`🔊 PLAYING AUDIO: "${text.substring(0, 50)}..." in ${languageCode}`);
     textToSpeech.current.speak(text, languageCode);
   };
 

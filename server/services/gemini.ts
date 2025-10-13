@@ -29,6 +29,8 @@ export async function translateText(
     const sourceLanguage = languageNames[sourceLang] || sourceLang;
     const targetLanguage = languageNames[targetLang] || targetLang;
 
+    console.log(`🔄 GEMINI TRANSLATION: "${text.substring(0, 50)}..." FROM ${sourceLanguage} → ${targetLanguage}`);
+
     const prompt = `Translate the following text from ${sourceLanguage} to ${targetLanguage}. Provide only the translated text, maintaining the tone and context. Do not add explanations or notes:\n\n${text}`;
 
     const response = await ai.models.generateContent({
@@ -36,9 +38,12 @@ export async function translateText(
       contents: prompt,
     });
 
-    return response.text?.trim() || text;
+    const translatedText = response.text?.trim() || text;
+    console.log(`✅ GEMINI RESPONSE: "${translatedText.substring(0, 50)}..."`);
+    
+    return translatedText;
   } catch (error) {
-    console.error("Translation error:", error);
+    console.error("❌ GEMINI TRANSLATION ERROR:", error);
     throw new Error(`Failed to translate text: ${error}`);
   }
 }

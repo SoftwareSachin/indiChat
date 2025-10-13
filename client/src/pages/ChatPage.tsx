@@ -145,7 +145,7 @@ export default function ChatPage() {
                   status="delivered"
                   translatedFrom={translatedFrom}
                   userName={isSent ? undefined : `User ${message.userId.slice(-4)}`}
-                  onPlayAudio={translation ? () => handlePlayAudio(message.id) : undefined}
+                  onPlayAudio={() => handlePlayAudio(message.id)}
                 />
               );
             })}
