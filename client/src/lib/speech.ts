@@ -19,7 +19,13 @@ export class SpeechRecognitionService {
   setLanguage(languageCode: string) {
     const langMap: Record<string, string> = {
       en: 'en-US',
+      es: 'es-ES',
+      fr: 'fr-FR',
+      de: 'de-DE',
+      zh: 'zh-CN',
+      ja: 'ja-JP',
       hi: 'hi-IN',
+      ar: 'ar-SA',
       ta: 'ta-IN',
       te: 'te-IN',
       bn: 'bn-IN',
@@ -77,7 +83,13 @@ export class TextToSpeechService {
     
     const langMap: Record<string, string> = {
       en: 'en-US',
+      es: 'es-ES',
+      fr: 'fr-FR',
+      de: 'de-DE',
+      zh: 'zh-CN',
+      ja: 'ja-JP',
       hi: 'hi-IN',
+      ar: 'ar-SA',
       ta: 'ta-IN',
       te: 'te-IN',
       bn: 'bn-IN',
@@ -87,6 +99,14 @@ export class TextToSpeechService {
     utterance.lang = langMap[languageCode] || 'en-US';
     utterance.rate = 0.9;
     utterance.pitch = 1;
+
+    // Try to find a voice for the selected language
+    const voices = this.synth.getVoices();
+    const targetLang = langMap[languageCode] || 'en-US';
+    const voice = voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
+    if (voice) {
+      utterance.voice = voice;
+    }
 
     this.synth.speak(utterance);
   }
