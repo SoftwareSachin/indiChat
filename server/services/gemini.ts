@@ -117,64 +117,135 @@ export async function transcribeSpeech(audioData: Buffer, languageCode: string, 
   }
 }
 
-// Text-to-speech using Gemini (native audio synthesis)
+// Helper function to clean and validate text for TTS
+function cleanTextForTTS(text: string): string {
+  // Remove special markers and clean up text
+  let cleaned = text
+    .replace(/\[.*?\]/g, '') // Remove bracketed content like [साइलेंट]
+    .replace(/\.{3,}/g, '.') // Replace multiple dots with single
+    .trim();
+
+  // If text is too short or just repeated characters, add context
+  if (cleaned.length < 3) {
+    return "";
+  }
+
+  // Check if text is just repeated characters (like "म्म्म्म्...")
+  const uniqueChars = new Set(cleaned.split('')).size;
+  if (uniqueChars < 3 && cleaned.length > 10) {
+    return ""; // Skip TTS for meaningless repetitions
+  }
+
+  // Truncate to reasonable length (Gemini TTS has limits)
+  if (cleaned.length > 900) {
+    cleaned = cleaned.substring(0, 900);
+  }
+
+  return cleaned;
+}
+
+// Helper function to sleep for retry logic
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Text-to-speech using Gemini with retry logic and fallbacks
 export async function generateSpeech(text: string, languageCode: string): Promise<Buffer> {
-  try {
-    const languageNames: Record<string, string> = {
-      hi: "Hindi",
-      bn: "Bengali", 
-      te: "Telugu",
-      mr: "Marathi",
-      ta: "Tamil",
-      gu: "Gujarati",
-      ur: "Urdu",
-      kn: "Kannada",
-      or: "Odia",
-      ml: "Malayalam",
-      pa: "Punjabi",
-      as: "Assamese",
-    };
+  const languageNames: Record<string, string> = {
+    hi: "Hindi",
+    bn: "Bengali", 
+    te: "Telugu",
+    mr: "Marathi",
+    ta: "Tamil",
+    gu: "Gujarati",
+    ur: "Urdu",
+    kn: "Kannada",
+    or: "Odia",
+    ml: "Malayalam",
+    pa: "Punjabi",
+    as: "Assamese",
+  };
 
-    const language = languageNames[languageCode] || "Hindi";
-    
-    console.log(`🔊 GEMINI TTS GENERATION: "${text.substring(0, 50)}..." in ${language}`);
+  const language = languageNames[languageCode] || "Hindi";
+  
+  // Clean and validate text
+  const cleanedText = cleanTextForTTS(text);
+  
+  if (!cleanedText) {
+    console.log(`⚠️ Text too short or invalid for TTS, skipping: "${text.substring(0, 30)}..."`);
+    throw new Error("Text not suitable for TTS");
+  }
 
-    const prompt = `Say this in ${language}: ${text}`;
+  console.log(`🔊 GEMINI TTS GENERATION: "${cleanedText.substring(0, 50)}..." in ${language}`);
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [
-        {
-          parts: [{ text: prompt }]
-        }
-      ],
-      config: {
-        responseModalities: ["AUDIO"],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: {
-              voiceName: 'Kore'
+  // Try multiple voices in order of preference
+  const voices = ['Kore', 'Puck', 'Charon', 'Orus'];
+  const maxRetries = 3;
+
+  for (const voiceName of voices) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Improved prompt format
+        const prompt = cleanedText;
+
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash-preview-tts",
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ],
+          config: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: voiceName
+                }
+              }
             }
           }
+        });
+
+        const audioPart = response.candidates?.[0]?.content?.parts?.find(
+          (part: any) => part.inlineData?.mimeType?.startsWith('audio/')
+        );
+
+        if (audioPart?.inlineData?.data) {
+          const audioBuffer = Buffer.from(audioPart.inlineData.data, 'base64');
+          console.log(`✅ GEMINI TTS SUCCESS: Generated ${audioBuffer.length} bytes with voice ${voiceName}`);
+          return audioBuffer;
+        }
+
+        // If no audio but no error, try next voice
+        console.log(`⚠️ No audio from voice ${voiceName}, trying next...`);
+        break; // Try next voice
+        
+      } catch (error: any) {
+        // Check if it's a quota error (429)
+        if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('RESOURCE_EXHAUSTED')) {
+          console.error(`🚫 GEMINI TTS QUOTA EXCEEDED: Free tier limit is 15 requests/day. Transcription and translation continue to work.`);
+          console.error(`💡 To enable TTS: Upgrade your Gemini API plan at https://ai.google.dev/pricing`);
+          throw new Error('TTS quota exceeded - upgrade API plan for unlimited TTS');
+        }
+
+        const isLastAttempt = attempt === maxRetries;
+        const isLastVoice = voiceName === voices[voices.length - 1];
+        
+        if (isLastAttempt && isLastVoice) {
+          console.error(`❌ GEMINI TTS FAILED after all retries with all voices:`, error.message);
+          throw new Error(`TTS failed: ${error.message}`);
+        }
+        
+        // Exponential backoff only for non-quota errors
+        if (!isLastAttempt) {
+          const delay = Math.pow(2, attempt) * 100; // 200ms, 400ms, 800ms
+          console.log(`⏳ Retry ${attempt}/${maxRetries} for voice ${voiceName} after ${delay}ms...`);
+          await sleep(delay);
         }
       }
-    });
-
-    const audioPart = response.candidates?.[0]?.content?.parts?.find(
-      (part: any) => part.inlineData?.mimeType?.startsWith('audio/')
-    );
-
-    if (!audioPart?.inlineData?.data) {
-      console.log("⚠️ No audio in response, falling back to text-only. Gemini may not support TTS with this model.");
-      throw new Error("No audio data in response");
     }
-
-    const audioBuffer = Buffer.from(audioPart.inlineData.data, 'base64');
-    console.log(`✅ GEMINI TTS: Generated ${audioBuffer.length} bytes of audio`);
-    
-    return audioBuffer;
-  } catch (error) {
-    console.error("❌ GEMINI TTS ERROR:", error);
-    throw new Error(`Failed to generate speech: ${error}`);
   }
+
+  throw new Error("TTS failed after trying all voices and retries");
 }

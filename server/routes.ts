@@ -346,17 +346,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
             }
 
-            // Generate audio for the user's language
-            const audioBuffer = await generateSpeech(textToSpeak, user.language);
-            
-            io.to(clientId).emit("audio:received", {
-              messageId: message.id,
-              audioData: audioBuffer.toString('base64'),
-              language: user.language,
-              mimeType: 'audio/pcm;rate=24000'
-            });
+            // Try to generate audio for the user's language (optional feature)
+            try {
+              const audioBuffer = await generateSpeech(textToSpeak, user.language);
+              
+              io.to(clientId).emit("audio:received", {
+                messageId: message.id,
+                audioData: audioBuffer.toString('base64'),
+                language: user.language,
+                mimeType: 'audio/pcm;rate=24000'
+              });
+              console.log(`✅ SENT TTS AUDIO to ${user.username} in ${user.language}`);
+            } catch (ttsError: any) {
+              // Check if it's a quota error
+              if (ttsError.message?.includes('quota')) {
+                console.log(`🚫 TTS QUOTA EXCEEDED - Message transcribed and translated successfully, audio playback unavailable`);
+                
+                // Send notification to user about quota (optional)
+                io.to(clientId).emit("tts:quota-exceeded", {
+                  message: "Voice playback unavailable - Gemini API free tier limit (15/day) reached. Text messages continue to work. Upgrade at https://ai.google.dev/pricing"
+                });
+              } else {
+                console.log(`⚠️ TTS failed for ${user.username}, but message was transcribed and translated successfully`);
+              }
+            }
           } catch (error) {
-            console.error("Audio processing error for user:", user.username, error);
+            console.error("Translation error for user:", user.username, error);
           }
         }
       } catch (error) {

@@ -30,7 +30,9 @@ export function useChat(userId: string, username: string, language: LanguageCode
   } = useChatStore();
 
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
+  const [audioLevel, setAudioLevel] = useState(0);
 
   // Keep refs updated with latest values
   useEffect(() => {
@@ -159,6 +161,21 @@ export function useChat(userId: string, username: string, language: LanguageCode
     }, 2000);
   };
 
+  // Monitor audio level while recording
+  useEffect(() => {
+    if (!isRecording || isPaused) {
+      setAudioLevel(0);
+      return;
+    }
+
+    const monitorInterval = setInterval(() => {
+      const level = audioRecorder.current.getAudioLevel();
+      setAudioLevel(level);
+    }, 100);
+
+    return () => clearInterval(monitorInterval);
+  }, [isRecording, isPaused]);
+
   const startVoiceInput = async () => {
     if (useGeminiAudio) {
       // Use Gemini-powered audio recording
@@ -201,6 +218,22 @@ export function useChat(userId: string, username: string, language: LanguageCode
     }
   };
 
+  const pauseVoiceInput = () => {
+    if (useGeminiAudio) {
+      audioRecorder.current.pauseRecording();
+      setIsPaused(true);
+      console.log('⏸️ Voice input paused');
+    }
+  };
+
+  const resumeVoiceInput = () => {
+    if (useGeminiAudio) {
+      audioRecorder.current.resumeRecording();
+      setIsPaused(false);
+      console.log('▶️ Voice input resumed');
+    }
+  };
+
   const stopVoiceInput = async () => {
     if (useGeminiAudio) {
       // Stop Gemini audio recording and send to server
@@ -226,14 +259,31 @@ export function useChat(userId: string, username: string, language: LanguageCode
         reader.readAsDataURL(audioBlob);
         
         setIsRecording(false);
+        setIsPaused(false);
       } catch (error) {
         console.error("❌ Failed to stop audio recording:", error);
         setIsRecording(false);
+        setIsPaused(false);
       }
     } else {
       // Stop browser's native speech recognition
       speechRecognition.current?.stop();
       setIsRecording(false);
+      setIsPaused(false);
+      setInterimTranscript("");
+    }
+  };
+
+  const cancelVoiceInput = () => {
+    if (useGeminiAudio) {
+      audioRecorder.current.cancelRecording();
+      setIsRecording(false);
+      setIsPaused(false);
+      console.log('❌ Voice input cancelled');
+    } else {
+      speechRecognition.current?.stop();
+      setIsRecording(false);
+      setIsPaused(false);
       setInterimTranscript("");
     }
   };
@@ -251,10 +301,15 @@ export function useChat(userId: string, username: string, language: LanguageCode
     sendMessage,
     notifyTyping,
     startVoiceInput,
+    pauseVoiceInput,
+    resumeVoiceInput,
     stopVoiceInput,
+    cancelVoiceInput,
     playAudio,
     stopAudio,
     isRecording,
+    isPaused,
     interimTranscript,
+    audioLevel,
   };
 }

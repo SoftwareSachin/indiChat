@@ -3,11 +3,10 @@ import { useLocation, useParams } from "wouter";
 import { ChatHeader } from "@/components/ChatHeader";
 import { MessageBubble } from "@/components/MessageBubble";
 import { MessageInput } from "@/components/MessageInput";
+import { AudioRecorder } from "@/components/AudioRecorder";
 import { TranslationIndicator } from "@/components/TranslationIndicator";
 import { TypingIndicator } from "@/components/TypingIndicator";
-import { VoiceWaveform } from "@/components/VoiceWaveform";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
 import { useChat } from "@/hooks/useChat";
@@ -62,10 +61,15 @@ export default function ChatPage() {
     sendMessage,
     notifyTyping,
     startVoiceInput,
+    pauseVoiceInput,
+    resumeVoiceInput,
     stopVoiceInput,
+    cancelVoiceInput,
     playAudio,
     isRecording,
+    isPaused,
     interimTranscript,
+    audioLevel,
   } = useChat(
     currentUser?.id || "",
     currentUser?.username || "",
@@ -159,20 +163,23 @@ export default function ChatPage() {
         </ScrollArea>
       </div>
 
-      {isRecording && (
-        <Card className="mx-4 mb-2 p-4">
-          <VoiceWaveform isActive={isRecording} />
-          <p className="text-sm text-center text-muted-foreground mt-2">
-            {interimTranscript || `Recording in ${getLanguageName(selectedLanguage)}...`}
-          </p>
-        </Card>
-      )}
+      <div className="px-4 pb-4">
+        <AudioRecorder
+          isRecording={isRecording}
+          isPaused={isPaused}
+          onStart={startVoiceInput}
+          onPause={pauseVoiceInput}
+          onResume={resumeVoiceInput}
+          onStop={stopVoiceInput}
+          onCancel={cancelVoiceInput}
+          interimTranscript={interimTranscript}
+          language={getLanguageName(selectedLanguage)}
+          audioLevel={audioLevel}
+        />
+      </div>
 
       <MessageInput
         onSendMessage={handleSendMessage}
-        onStartVoiceInput={startVoiceInput}
-        onStopVoiceInput={stopVoiceInput}
-        isRecording={isRecording}
         placeholder={`Type a message in ${getLanguageName(selectedLanguage)}...`}
         onTyping={notifyTyping}
       />
