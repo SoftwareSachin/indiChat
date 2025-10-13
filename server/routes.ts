@@ -290,6 +290,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
 
+    socket.on("audio:send", async (data: {
+      userId: string;
+      roomId: string;
+      audioData: string; // base64 encoded audio
+      originalLanguage: string;
+      mimeType: string;
+    }) => {
+      try {
+        const isMember = await storage.isRoomMember(data.roomId, data.userId);
+        
+        if (!isMember) {
+          socket.emit("message:error", { error: "Not authorized to send messages in this room" });
+          return;
+        }
+
+        console.log(`🎤 Received audio message from ${data.userId} in ${data.originalLanguage}`);
+
+        // Transcribe audio using Gemini
+        const audioBuffer = Buffer.from(data.audioData, 'base64');
+        const transcribedText = await transcribeSpeech(audioBuffer, data.originalLanguage, data.mimeType);
+
+        // Save the transcribed message
+        const message = await storage.createMessage({
+          userId: data.userId,
+          roomId: data.roomId,
+          content: transcribedText,
+          originalLanguage: data.originalLanguage,
+          translatedContent: null,
+          targetLanguage: null,
+        });
+
+        io.to(data.roomId).emit("message:new", message);
+
+        const roomUsers = Array.from(connectedUsers.entries())
+          .filter(([_, user]) => user.roomId === data.roomId);
+        
+        // Translate and generate audio for each user
+        for (const [clientId, user] of roomUsers) {
+          try {
+            let textToSpeak = transcribedText;
+            
+            // Translate if different language
+            if (user.language !== data.originalLanguage) {
+              textToSpeak = await translateText(
+                transcribedText,
+                data.originalLanguage,
+                user.language
+              );
+
+              io.to(clientId).emit("message:translated", {
+                messageId: message.id,
+                translatedContent: textToSpeak,
+                targetLanguage: user.language,
+              });
+            }
+
+            // Generate audio for the user's language
+            const audioBuffer = await generateSpeech(textToSpeak, user.language);
+            
+            io.to(clientId).emit("audio:received", {
+              messageId: message.id,
+              audioData: audioBuffer.toString('base64'),
+              language: user.language,
+              mimeType: 'audio/pcm;rate=24000'
+            });
+          } catch (error) {
+            console.error("Audio processing error for user:", user.username, error);
+          }
+        }
+      } catch (error) {
+        console.error("Audio send error:", error);
+        socket.emit("message:error", { error: "Failed to process audio message" });
+      }
+    });
+
     socket.on("user:typing", (data: { userId: string; username: string; roomId: string }) => {
       socket.to(data.roomId).emit("user:typing", data);
     });
