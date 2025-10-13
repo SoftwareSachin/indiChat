@@ -124,13 +124,37 @@ export default function RoomsPage() {
     }
   };
 
-  const copyInviteLink = (code: string) => {
-    const inviteUrl = `${window.location.origin}/invite/${code}`;
-    navigator.clipboard.writeText(inviteUrl);
-    toast({
-      title: "Link copied",
-      description: "Share this link to invite others to the room",
-    });
+  const copyInviteLink = async (code: string) => {
+    try {
+      const inviteUrl = `${window.location.origin}/invite/${code}`;
+      await navigator.clipboard.writeText(inviteUrl);
+      toast({
+        title: "Link copied",
+        description: "Share this link to invite others to the room",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again or copy manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyInviteCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast({
+        title: "Code copied",
+        description: "Share this code to invite others to the room",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again or copy manually",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -272,18 +296,34 @@ export default function RoomsPage() {
                       <p className="text-xs text-muted-foreground mb-1">Invite Code</p>
                       <code className="text-xs bg-muted px-2 py-1 rounded">{room.inviteCode}</code>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        copyInviteLink(room.inviteCode);
-                      }}
-                    >
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copy Invite Link
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyInviteCode(room.inviteCode);
+                        }}
+                        data-testid={`button-copy-code-${room.id}`}
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy Code
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyInviteLink(room.inviteCode);
+                        }}
+                        data-testid={`button-copy-link-${room.id}`}
+                      >
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy Link
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
