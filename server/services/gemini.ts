@@ -93,12 +93,16 @@ export async function transcribeSpeech(audioData: Buffer, languageCode: string, 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
-        prompt,
         {
-          inlineData: {
-            data: audioData.toString('base64'),
-            mimeType: mimeType,
-          }
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                data: audioData.toString('base64'),
+                mimeType: mimeType,
+              }
+            }
+          ]
         }
       ],
     });
@@ -135,11 +139,15 @@ export async function generateSpeech(text: string, languageCode: string): Promis
     
     console.log(`🔊 GEMINI TTS GENERATION: "${text.substring(0, 50)}..." in ${language}`);
 
-    const prompt = `Generate natural speech in ${language} for this text: ${text}`;
+    const prompt = `Say this in ${language}: ${text}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: prompt,
+      contents: [
+        {
+          parts: [{ text: prompt }]
+        }
+      ],
       config: {
         responseModalities: ["AUDIO"],
         speechConfig: {
@@ -157,6 +165,7 @@ export async function generateSpeech(text: string, languageCode: string): Promis
     );
 
     if (!audioPart?.inlineData?.data) {
+      console.log("⚠️ No audio in response, falling back to text-only. Gemini may not support TTS with this model.");
       throw new Error("No audio data in response");
     }
 
