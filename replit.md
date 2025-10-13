@@ -1,8 +1,8 @@
-# BharatChat - Global Multilingual Chat Platform
+# Xchat - Global Multilingual Chat Platform
 
 ## Overview
 
-BharatChat is a real-time multilingual chat platform that enables users to communicate across language barriers by providing instant translation, speech-to-text input, and text-to-speech output. It supports **12 major languages**: English, Spanish, French, German, Chinese, Japanese, Hindi, Arabic, Tamil, Telugu, Bengali, and Marathi.
+Xchat is a real-time multilingual chat platform that enables users to communicate across language barriers by providing instant translation, speech-to-text input, and text-to-speech output. It supports **12 major languages**: English, Spanish, French, German, Chinese, Japanese, Hindi, Arabic, Tamil, Telugu, Bengali, and Marathi.
 
 The platform leverages modern web technologies and Google Gemini AI to deliver a WhatsApp-like chat experience with AI-powered translation capabilities, making cross-lingual communication seamless and accessible worldwide.
 
