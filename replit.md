@@ -17,14 +17,22 @@ The platform leverages modern web technologies and Google Gemini AI to deliver a
 
 ### Four Communication Modes
 1. **Text-to-Text**: AI-powered translation using Google Gemini 2.5 Flash
-2. **Speech-to-Text**: Browser-native speech recognition for all 12 languages
-3. **Text-to-Speech**: Automatic voice synthesis with language-specific voices
-4. **Speech-to-Speech**: Complete voice translation pipeline across languages
+2. **Speech-to-Text**: Gemini AI audio transcription for all 12 languages
+3. **Text-to-Speech**: Gemini AI native audio synthesis with language-specific voices
+4. **Speech-to-Speech**: Complete voice translation pipeline using Gemini audio capabilities
+
+### Enhanced Gemini Audio Integration (October 2025)
+- **Gemini-powered audio transcription**: Uses Gemini 2.5 Flash for accurate speech-to-text
+- **Gemini native TTS**: Uses gemini-2.5-flash-preview-tts model for natural voice synthesis
+- **Real-time audio translation**: Complete pipeline from audio recording → transcription → translation → audio generation
+- **WebSocket audio streaming**: Efficient audio message delivery to multiple users
+- **PCM audio playback**: High-quality 24kHz audio playback on the frontend
 
 ### Bug Fixes
 - Fixed copy invite code and copy link functionality with proper async/await handling
 - Implemented session management to prevent cross-tab logout issues
 - Added warning notifications when sessions are replaced by other users
+- Fixed Gemini API request structures for proper audio handling
 
 ## User Preferences
 
