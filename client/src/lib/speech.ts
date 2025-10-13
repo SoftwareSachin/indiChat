@@ -3,7 +3,7 @@ export class SpeechRecognitionService {
   private recognition: any;
   private isListening = false;
 
-  constructor(language: string = 'en-US') {
+  constructor(language: string = 'hi-IN') {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
@@ -18,20 +18,20 @@ export class SpeechRecognitionService {
 
   setLanguage(languageCode: string) {
     const langMap: Record<string, string> = {
-      en: 'en-US',
-      es: 'es-ES',
-      fr: 'fr-FR',
-      de: 'de-DE',
-      zh: 'zh-CN',
-      ja: 'ja-JP',
       hi: 'hi-IN',
-      ar: 'ar-SA',
-      ta: 'ta-IN',
-      te: 'te-IN',
       bn: 'bn-IN',
+      te: 'te-IN',
       mr: 'mr-IN',
+      ta: 'ta-IN',
+      gu: 'gu-IN',
+      ur: 'ur-IN',
+      kn: 'kn-IN',
+      or: 'or-IN',
+      ml: 'ml-IN',
+      pa: 'pa-IN',
+      as: 'as-IN',
     };
-    this.recognition.lang = langMap[languageCode] || 'en-US';
+    this.recognition.lang = langMap[languageCode] || 'hi-IN';
   }
 
   start(
@@ -82,27 +82,27 @@ export class TextToSpeechService {
     const utterance = new SpeechSynthesisUtterance(text);
     
     const langMap: Record<string, string> = {
-      en: 'en-US',
-      es: 'es-ES',
-      fr: 'fr-FR',
-      de: 'de-DE',
-      zh: 'zh-CN',
-      ja: 'ja-JP',
       hi: 'hi-IN',
-      ar: 'ar-SA',
-      ta: 'ta-IN',
-      te: 'te-IN',
       bn: 'bn-IN',
+      te: 'te-IN',
       mr: 'mr-IN',
+      ta: 'ta-IN',
+      gu: 'gu-IN',
+      ur: 'ur-IN',
+      kn: 'kn-IN',
+      or: 'or-IN',
+      ml: 'ml-IN',
+      pa: 'pa-IN',
+      as: 'as-IN',
     };
     
-    utterance.lang = langMap[languageCode] || 'en-US';
+    utterance.lang = langMap[languageCode] || 'hi-IN';
     utterance.rate = 0.9;
     utterance.pitch = 1;
 
     // Try to find a voice for the selected language
     const voices = this.synth.getVoices();
-    const targetLang = langMap[languageCode] || 'en-US';
+    const targetLang = langMap[languageCode] || 'hi-IN';
     const voice = voices.find(v => v.lang.startsWith(targetLang.split('-')[0]));
     if (voice) {
       utterance.voice = voice;

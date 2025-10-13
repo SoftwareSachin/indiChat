@@ -12,18 +12,18 @@ export async function translateText(
 ): Promise<string> {
   try {
     const languageNames: Record<string, string> = {
-      en: "English",
-      es: "Spanish",
-      fr: "French",
-      de: "German",
-      zh: "Chinese (Simplified)",
-      ja: "Japanese",
       hi: "Hindi",
-      ar: "Arabic",
-      ta: "Tamil",
-      te: "Telugu",
       bn: "Bengali",
+      te: "Telugu",
       mr: "Marathi",
+      ta: "Tamil",
+      gu: "Gujarati",
+      ur: "Urdu",
+      kn: "Kannada",
+      or: "Odia",
+      ml: "Malayalam",
+      pa: "Punjabi",
+      as: "Assamese",
     };
 
     const sourceLanguage = languageNames[sourceLang] || sourceLang;
@@ -45,19 +45,19 @@ export async function translateText(
 
 export async function detectLanguage(text: string): Promise<string> {
   try {
-    const prompt = `Detect the language of this text and respond with only the ISO 639-1 language code. Valid codes are: en (English), es (Spanish), fr (French), de (German), zh (Chinese), ja (Japanese), hi (Hindi), ar (Arabic), ta (Tamil), te (Telugu), bn (Bengali), mr (Marathi). Text: ${text}`;
+    const prompt = `Detect the language of this text and respond with only the ISO 639-1 language code. Valid codes are: hi (Hindi), bn (Bengali), te (Telugu), mr (Marathi), ta (Tamil), gu (Gujarati), ur (Urdu), kn (Kannada), or (Odia), ml (Malayalam), pa (Punjabi), as (Assamese). Text: ${text}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
     });
 
-    const detected = response.text?.trim().toLowerCase() || "en";
-    const validCodes = ["en", "es", "fr", "de", "zh", "ja", "hi", "ar", "ta", "te", "bn", "mr"];
-    return validCodes.includes(detected) ? detected : "en";
+    const detected = response.text?.trim().toLowerCase() || "hi";
+    const validCodes = ["hi", "bn", "te", "mr", "ta", "gu", "ur", "kn", "or", "ml", "pa", "as"];
+    return validCodes.includes(detected) ? detected : "hi";
   } catch (error) {
     console.error("Language detection error:", error);
-    return "en";
+    return "hi";
   }
 }
 
