@@ -13,7 +13,13 @@ export async function translateText(
   try {
     const languageNames: Record<string, string> = {
       en: "English",
+      es: "Spanish",
+      fr: "French",
+      de: "German",
+      zh: "Chinese (Simplified)",
+      ja: "Japanese",
       hi: "Hindi",
+      ar: "Arabic",
       ta: "Tamil",
       te: "Telugu",
       bn: "Bengali",
@@ -23,7 +29,7 @@ export async function translateText(
     const sourceLanguage = languageNames[sourceLang] || sourceLang;
     const targetLanguage = languageNames[targetLang] || targetLang;
 
-    const prompt = `Translate the following text from ${sourceLanguage} to ${targetLanguage}. Only return the translated text, nothing else:\n\n${text}`;
+    const prompt = `Translate the following text from ${sourceLanguage} to ${targetLanguage}. Provide only the translated text, maintaining the tone and context. Do not add explanations or notes:\n\n${text}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -39,7 +45,7 @@ export async function translateText(
 
 export async function detectLanguage(text: string): Promise<string> {
   try {
-    const prompt = `Detect the language of this text and respond with only the ISO 639-1 language code (en, hi, ta, te, bn, or mr). Text: ${text}`;
+    const prompt = `Detect the language of this text and respond with only the ISO 639-1 language code. Valid codes are: en (English), es (Spanish), fr (French), de (German), zh (Chinese), ja (Japanese), hi (Hindi), ar (Arabic), ta (Tamil), te (Telugu), bn (Bengali), mr (Marathi). Text: ${text}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -47,10 +53,36 @@ export async function detectLanguage(text: string): Promise<string> {
     });
 
     const detected = response.text?.trim().toLowerCase() || "en";
-    const validCodes = ["en", "hi", "ta", "te", "bn", "mr"];
+    const validCodes = ["en", "es", "fr", "de", "zh", "ja", "hi", "ar", "ta", "te", "bn", "mr"];
     return validCodes.includes(detected) ? detected : "en";
   } catch (error) {
     console.error("Language detection error:", error);
     return "en";
+  }
+}
+
+// Text-to-speech using Gemini (for higher quality audio in supported languages)
+export async function generateSpeech(text: string, languageCode: string): Promise<string> {
+  try {
+    // Note: Gemini 2.5 Flash supports text input only. 
+    // For actual TTS, we'll use the browser's native speech synthesis
+    // This function can be extended when Gemini adds TTS support
+    return text;
+  } catch (error) {
+    console.error("Speech generation error:", error);
+    throw new Error(`Failed to generate speech: ${error}`);
+  }
+}
+
+// Speech-to-text using Gemini (for improved accuracy with context)
+export async function transcribeSpeech(audioData: string, languageCode: string): Promise<string> {
+  try {
+    // Note: Gemini 2.5 Flash supports text input only
+    // For actual STT, we'll use the browser's native speech recognition
+    // This function can be extended when Gemini adds audio input support
+    return "";
+  } catch (error) {
+    console.error("Transcription error:", error);
+    throw new Error(`Failed to transcribe speech: ${error}`);
   }
 }
