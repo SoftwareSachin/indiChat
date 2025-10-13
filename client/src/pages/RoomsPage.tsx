@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Copy, LogOut, MessageSquare, Lock, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { AuthManager } from "@/lib/auth-manager";
 
 interface Room {
   id: string;
@@ -39,6 +40,24 @@ export default function RoomsPage() {
       return;
     }
     fetchRooms();
+
+    // Listen for session changes from other tabs
+    const authManager = AuthManager.getInstance();
+    authManager.startListening(() => {
+      toast({
+        title: "Session replaced",
+        description: "Another user logged in from a different tab. Please log in again.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        authManager.clearAuth();
+        setLocation("/auth");
+      }, 2000);
+    });
+
+    return () => {
+      authManager.stopListening();
+    };
   }, [token]);
 
   const fetchRooms = async () => {
@@ -158,8 +177,8 @@ export default function RoomsPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    const authManager = AuthManager.getInstance();
+    authManager.clearAuth();
     setLocation("/auth");
   };
 

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { type LanguageCode, SUPPORTED_LANGUAGES } from "@/lib/languages";
 import { Separator } from "@/components/ui/separator";
+import { AuthManager } from "@/lib/auth-manager";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
@@ -40,8 +41,9 @@ export default function AuthPage() {
         throw new Error(data.error || "Authentication failed");
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Use AuthManager to set auth data
+      const authManager = AuthManager.getInstance();
+      authManager.setAuthData(data.token, data.user);
 
       toast({
         title: isLogin ? "Welcome back" : "Account created",
@@ -78,6 +80,13 @@ export default function AuthPage() {
               ? "Enter your credentials to access your chat rooms" 
               : "Create an account to start chatting with real-time translation"}
           </CardDescription>
+          {!isLogin && (
+            <div className="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
+              <p className="text-xs text-yellow-600 dark:text-yellow-500">
+                <strong>Note:</strong> Multiple accounts in the same browser will share the same session. For testing with multiple users, please use different browsers or incognito/private windows.
+              </p>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

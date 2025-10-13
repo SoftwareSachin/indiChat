@@ -13,12 +13,15 @@ import { useChatStore } from "@/store/chatStore";
 import { useChat } from "@/hooks/useChat";
 import { type LanguageCode, getLanguageName } from "@/lib/languages";
 import { ArrowLeft } from "lucide-react";
+import { AuthManager } from "@/lib/auth-manager";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ChatPage() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const roomId = params.roomId as string;
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
   const token = localStorage.getItem("token");
   const userStr = localStorage.getItem("user");
@@ -26,7 +29,26 @@ export default function ChatPage() {
   useEffect(() => {
     if (!token || !userStr) {
       setLocation("/auth");
+      return;
     }
+
+    // Listen for session changes from other tabs
+    const authManager = AuthManager.getInstance();
+    authManager.startListening(() => {
+      toast({
+        title: "Session replaced",
+        description: "Another user logged in from a different tab. Redirecting to login...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        authManager.clearAuth();
+        setLocation("/auth");
+      }, 2000);
+    });
+
+    return () => {
+      authManager.stopListening();
+    };
   }, [token, userStr, setLocation]);
 
   const currentUser = userStr ? JSON.parse(userStr) : null;
