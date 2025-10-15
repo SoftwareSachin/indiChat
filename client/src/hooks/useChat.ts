@@ -24,6 +24,8 @@ export function useChat(userId: string, username: string, language: LanguageCode
     addTranslation,
     setUserTyping,
     removeUserTyping,
+    setUserRecording,
+    removeUserRecording,
     setUser,
   } = useChatStore();
 
@@ -85,6 +87,14 @@ export function useChat(userId: string, username: string, language: LanguageCode
       removeUserTyping(data.userId);
     };
 
+    const handleUserRecording = (data: { userId: string; username: string }) => {
+      setUserRecording(data.userId, data.username);
+    };
+
+    const handleUserStopRecording = (data: { userId: string }) => {
+      removeUserRecording(data.userId);
+    };
+
     const handleAudioReceived = async (data: { messageId: string; audioData: string; language: string; mimeType: string }) => {
       console.log(`🔊 RECEIVED AUDIO from Gemini: ${data.audioData.length} chars for message ${data.messageId}`);
       try {
@@ -111,6 +121,8 @@ export function useChat(userId: string, username: string, language: LanguageCode
     s.on("message:translated", handleMessageTranslated);
     s.on("user:typing", handleUserTyping);
     s.on("user:stop-typing", handleUserStopTyping);
+    s.on("user:recording", handleUserRecording);
+    s.on("user:stop-recording", handleUserStopRecording);
     s.on("audio:received", handleAudioReceived);
 
     if (s.connected) {
@@ -128,13 +140,15 @@ export function useChat(userId: string, username: string, language: LanguageCode
       s.off("message:translated", handleMessageTranslated);
       s.off("user:typing", handleUserTyping);
       s.off("user:stop-typing", handleUserStopTyping);
+      s.off("user:recording", handleUserRecording);
+      s.off("user:stop-recording", handleUserStopRecording);
       s.off("audio:received", handleAudioReceived);
       
       if (typingTimeout.current) {
         clearTimeout(typingTimeout.current);
       }
     };
-  }, [setConnectionStatus, setMessages, addMessage, addTranslation, setUserTyping, removeUserTyping]);
+  }, [setConnectionStatus, setMessages, addMessage, addTranslation, setUserTyping, removeUserTyping, setUserRecording, removeUserRecording]);
 
   // Update user info and notify server when language changes
   useEffect(() => {
@@ -191,6 +205,9 @@ export function useChat(userId: string, username: string, language: LanguageCode
       console.log(`🎤 WHISPER AUDIO RECORDING STARTED: Language ${language}`);
       await audioRecorder.current.startRecording();
       setIsRecording(true);
+      
+      // Notify others that user is recording
+      socket.current.emit("user:recording", { userId, username, roomId });
     } catch (error) {
       console.error("❌ Failed to start audio recording:", error);
       setIsRecording(false);
@@ -215,6 +232,9 @@ export function useChat(userId: string, username: string, language: LanguageCode
       const { audioBlob, mimeType } = await audioRecorder.current.stopRecording();
       console.log(`🛑 WHISPER AUDIO RECORDING STOPPED: ${audioBlob.size} bytes`);
       
+      // Notify others that user stopped recording
+      socket.current.emit("user:stop-recording", { userId, roomId });
+      
       // Convert blob to base64
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -236,6 +256,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
       setIsPaused(false);
     } catch (error) {
       console.error("❌ Failed to stop audio recording:", error);
+      socket.current.emit("user:stop-recording", { userId, roomId });
       setIsRecording(false);
       setIsPaused(false);
     }
@@ -243,6 +264,10 @@ export function useChat(userId: string, username: string, language: LanguageCode
 
   const cancelVoiceInput = () => {
     audioRecorder.current.cancelRecording();
+    
+    // Notify others that user stopped recording
+    socket.current.emit("user:stop-recording", { userId, roomId });
+    
     setIsRecording(false);
     setIsPaused(false);
     console.log('❌ Voice input cancelled');

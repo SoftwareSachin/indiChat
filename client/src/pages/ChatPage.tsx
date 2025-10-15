@@ -6,6 +6,7 @@ import { MessageInput } from "@/components/MessageInput";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { TranslationIndicator } from "@/components/TranslationIndicator";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { RecordingIndicator } from "@/components/RecordingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
@@ -56,7 +57,7 @@ export default function ChatPage() {
     currentUser?.preferredLanguage || 'en'
   );
 
-  const { messages, connectionStatus, typingUsers, translatedMessages } = useChatStore();
+  const { messages, connectionStatus, typingUsers, recordingUsers, translatedMessages } = useChatStore();
   
   const {
     sendMessage,
@@ -106,6 +107,7 @@ export default function ChatPage() {
   }, [messages]);
 
   const typingUsersList = Array.from(typingUsers.values());
+  const recordingUsersList = Array.from(recordingUsers.values());
 
   if (!currentUser) {
     return null;
@@ -210,6 +212,9 @@ export default function ChatPage() {
             {isTranslating && <TranslationIndicator isTranslating={isTranslating} />}
             {typingUsersList.length > 0 && (
               <TypingIndicator userName={typingUsersList[0]} />
+            )}
+            {recordingUsersList.length > 0 && (
+              <RecordingIndicator userName={recordingUsersList[0]} />
             )}
           </div>
         </ScrollArea>
