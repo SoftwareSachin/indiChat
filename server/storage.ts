@@ -10,6 +10,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserLanguage(id: string, language: string): Promise<User | undefined>;
   updateUser(id: string, data: UpdateUser): Promise<User | undefined>;
+  updateUserStatus(id: string, isOnline: boolean, lastSeen?: Date): Promise<void>;
   
   // Message methods
   createMessage(message: InsertMessage): Promise<Message>;
@@ -70,6 +71,15 @@ export class DbStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async updateUserStatus(id: string, isOnline: boolean, lastSeen?: Date): Promise<void> {
+    await db.update(users)
+      .set({ 
+        isOnline, 
+        lastSeen: lastSeen || new Date() 
+      })
+      .where(eq(users.id, id));
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {

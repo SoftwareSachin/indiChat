@@ -346,6 +346,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       socket.join(data.roomId);
       
+      // Update user online status
+      await storage.updateUserStatus(data.userId, true);
+      
       io.to(data.roomId).emit("user:joined", {
         userId: data.userId,
         username: data.username,
@@ -536,6 +539,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       socket.to(data.roomId).emit("user:stop-typing", data);
     });
 
+    socket.on("user:recording", (data: { userId: string; username: string; roomId: string }) => {
+      socket.to(data.roomId).emit("user:recording", data);
+    });
+
+    socket.on("user:stop-recording", (data: { userId: string; roomId: string }) => {
+      socket.to(data.roomId).emit("user:stop-recording", data);
+    });
+
     socket.on("user:language-change", (data: { userId: string; language: string }) => {
       const user = connectedUsers.get(socket.id);
       if (user) {
@@ -544,9 +555,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       const user = connectedUsers.get(socket.id);
       if (user) {
+        // Update user offline status and last seen
+        await storage.updateUserStatus(user.id, false, new Date());
+        
         connectedUsers.delete(socket.id);
         io.to(user.roomId).emit("user:left", {
           userId: user.id,
