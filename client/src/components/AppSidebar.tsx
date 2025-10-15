@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { 
   MessageSquare, 
@@ -13,7 +13,7 @@ import {
   Sun
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AuthManager } from "@/lib/auth-manager";
 import { useTheme } from "@/lib/theme-provider";
 import { cn } from "@/lib/utils";
+import { socket } from "@/lib/socket";
 
 interface AppSidebarProps {
   isOpen?: boolean;
@@ -37,9 +38,84 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
+  const token = localStorage.getItem("token");
+
+  // Identify user to socket for notifications
+  useEffect(() => {
+    if (user?.id) {
+      socket.emit("user:identify", { userId: user.id });
+    }
+  }, [user?.id]);
+
+  // Fetch notification count
+  const fetchNotificationCount = async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch("/api/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const unreadCount = data.filter((n: any) => !n.isRead).length;
+        setNotificationCount(unreadCount);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notification count:", error);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchNotificationCount();
+  }, [token]);
+
+  // Refetch count when page becomes visible or focused
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotificationCount();
+      }
+    };
+
+    const handleFocus = () => {
+      fetchNotificationCount();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [token]);
+
+  // Listen for real-time notification updates
+  useEffect(() => {
+    const handleNewNotification = () => {
+      setNotificationCount(prev => prev + 1);
+    };
+
+    const handleNotificationRead = () => {
+      fetchNotificationCount();
+    };
+
+    socket.on("notification:new", handleNewNotification);
+    socket.on("notification:read", handleNotificationRead);
+
+    return () => {
+      socket.off("notification:new", handleNewNotification);
+      socket.off("notification:read", handleNotificationRead);
+    };
+  }, [token]);
 
   const handleLogout = () => {
     const authManager = AuthManager.getInstance();
@@ -70,9 +146,9 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
     {
       icon: Bell,
       label: "Notifications",
-      href: "#",
-      active: false,
-      badge: 3,
+      href: "/notifications",
+      active: location === "/notifications",
+      badge: notificationCount > 0 ? notificationCount : undefined,
     },
     {
       icon: Settings,
@@ -138,9 +214,13 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
               data-testid="button-profile-menu"
             >
               <Avatar className="w-10 h-10">
-                <AvatarFallback className="bg-primary text-primary-foreground title-medium">
-                  {getInitials(user.username)}
-                </AvatarFallback>
+                {user.profileImage ? (
+                  <AvatarImage src={user.profileImage} alt={user.username} />
+                ) : (
+                  <AvatarFallback className="bg-primary text-primary-foreground title-medium">
+                    {getInitials(user.username)}
+                  </AvatarFallback>
+                )}
               </Avatar>
               {!isCollapsed && (
                 <div className="flex-1 text-left">

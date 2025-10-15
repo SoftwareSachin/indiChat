@@ -281,7 +281,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/notifications/:id/read", authMiddleware, async (req, res) => {
     try {
+      const userId = (req as any).user.userId;
       await storage.markNotificationAsRead(req.params.id);
+      
+      // Emit notification:read event only to this specific user
+      io.to(`user:${userId}`).emit("notification:read", { userId });
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to mark notification as read" });
@@ -292,6 +297,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req as any).user.userId;
       await storage.markAllNotificationsAsRead(userId);
+      
+      // Emit notification:read event only to this specific user
+      io.to(`user:${userId}`).emit("notification:read", { userId });
+      
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to mark all notifications as read" });
@@ -308,6 +317,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
+
+    // Join user-specific room for notifications
+    socket.on("user:identify", (data: { userId: string }) => {
+      socket.join(`user:${data.userId}`);
+      console.log(`User ${data.userId} joined their notification room`);
+    });
 
     socket.on("room:join", async (data: { 
       userId: string; 
@@ -385,11 +400,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               messageId: message.id,
             });
 
-            // Find the socket ID for this user
-            const userSocket = roomUsers.find(([_, user]) => user.id === member.userId);
-            if (userSocket) {
-              io.to(userSocket[0]).emit("notification:new", notification);
-            }
+            // Emit to user-specific room for notifications
+            io.to(`user:${member.userId}`).emit("notification:new", notification);
           }
         }
         
