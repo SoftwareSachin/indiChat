@@ -10,6 +10,13 @@ interface ChatUser {
   language: LanguageCode;
 }
 
+interface UserStatus {
+  userId: string;
+  username: string;
+  isOnline: boolean;
+  lastSeen?: Date | string;
+}
+
 interface ChatState {
   user: ChatUser | null;
   messages: Message[];
@@ -17,6 +24,7 @@ interface ChatState {
   isTyping: boolean;
   typingUsers: Map<string, string>;
   recordingUsers: Map<string, string>;
+  userStatuses: Map<string, UserStatus>;
   translatedMessages: Map<string, { content: string; language: string }>;
   
   // Actions
@@ -29,6 +37,7 @@ interface ChatState {
   removeUserTyping: (userId: string) => void;
   setUserRecording: (userId: string, username: string) => void;
   removeUserRecording: (userId: string) => void;
+  setUserStatus: (userId: string, username: string, isOnline: boolean, lastSeen?: Date | string) => void;
   clearMessages: () => void;
 }
 
@@ -39,6 +48,7 @@ export const useChatStore = create<ChatState>((set) => ({
   isTyping: false,
   typingUsers: new Map(),
   recordingUsers: new Map(),
+  userStatuses: new Map(),
   translatedMessages: new Map(),
 
   setUser: (user) => set({ user }),
@@ -79,6 +89,12 @@ export const useChatStore = create<ChatState>((set) => ({
     const newRecordingUsers = new Map(state.recordingUsers);
     newRecordingUsers.delete(userId);
     return { recordingUsers: newRecordingUsers };
+  }),
+
+  setUserStatus: (userId, username, isOnline, lastSeen) => set((state) => {
+    const newUserStatuses = new Map(state.userStatuses);
+    newUserStatuses.set(userId, { userId, username, isOnline, lastSeen });
+    return { userStatuses: newUserStatuses };
   }),
   
   clearMessages: () => set({ messages: [] }),

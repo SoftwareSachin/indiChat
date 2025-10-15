@@ -26,6 +26,7 @@ export function useChat(userId: string, username: string, language: LanguageCode
     removeUserTyping,
     setUserRecording,
     removeUserRecording,
+    setUserStatus,
     setUser,
   } = useChatStore();
 
@@ -95,6 +96,14 @@ export function useChat(userId: string, username: string, language: LanguageCode
       removeUserRecording(data.userId);
     };
 
+    const handleUserOnline = (data: { userId: string; username: string; isOnline: boolean; lastSeen?: Date | string }) => {
+      setUserStatus(data.userId, data.username, data.isOnline, data.lastSeen);
+    };
+
+    const handleUserOffline = (data: { userId: string; username: string; isOnline: boolean; lastSeen?: Date | string }) => {
+      setUserStatus(data.userId, data.username, data.isOnline, data.lastSeen);
+    };
+
     const handleAudioReceived = async (data: { messageId: string; audioData: string; language: string; mimeType: string }) => {
       console.log(`🔊 RECEIVED AUDIO from Gemini: ${data.audioData.length} chars for message ${data.messageId}`);
       try {
@@ -123,6 +132,8 @@ export function useChat(userId: string, username: string, language: LanguageCode
     s.on("user:stop-typing", handleUserStopTyping);
     s.on("user:recording", handleUserRecording);
     s.on("user:stop-recording", handleUserStopRecording);
+    s.on("user:online", handleUserOnline);
+    s.on("user:offline", handleUserOffline);
     s.on("audio:received", handleAudioReceived);
 
     if (s.connected) {
@@ -142,13 +153,15 @@ export function useChat(userId: string, username: string, language: LanguageCode
       s.off("user:stop-typing", handleUserStopTyping);
       s.off("user:recording", handleUserRecording);
       s.off("user:stop-recording", handleUserStopRecording);
+      s.off("user:online", handleUserOnline);
+      s.off("user:offline", handleUserOffline);
       s.off("audio:received", handleAudioReceived);
       
       if (typingTimeout.current) {
         clearTimeout(typingTimeout.current);
       }
     };
-  }, [setConnectionStatus, setMessages, addMessage, addTranslation, setUserTyping, removeUserTyping, setUserRecording, removeUserRecording]);
+  }, [setConnectionStatus, setMessages, addMessage, addTranslation, setUserTyping, removeUserTyping, setUserRecording, removeUserRecording, setUserStatus]);
 
   // Update user info and notify server when language changes
   useEffect(() => {

@@ -349,9 +349,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user online status
       await storage.updateUserStatus(data.userId, true);
       
+      // Get user data to send status
+      const user = await storage.getUser(data.userId);
+      
       io.to(data.roomId).emit("user:joined", {
         userId: data.userId,
         username: data.username,
+      });
+      
+      // Broadcast online status to room
+      io.to(data.roomId).emit("user:online", {
+        userId: data.userId,
+        username: data.username,
+        isOnline: true,
+        lastSeen: user?.lastSeen,
       });
 
       const messages = await storage.getMessagesByRoom(data.roomId, 50);
@@ -558,13 +569,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     socket.on("disconnect", async () => {
       const user = connectedUsers.get(socket.id);
       if (user) {
+        const now = new Date();
+        
         // Update user offline status and last seen
-        await storage.updateUserStatus(user.id, false, new Date());
+        await storage.updateUserStatus(user.id, false, now);
         
         connectedUsers.delete(socket.id);
+        
         io.to(user.roomId).emit("user:left", {
           userId: user.id,
           username: user.username,
+        });
+        
+        // Broadcast offline status to room
+        io.to(user.roomId).emit("user:offline", {
+          userId: user.id,
+          username: user.username,
+          isOnline: false,
+          lastSeen: now,
         });
       }
       console.log("User disconnected:", socket.id);

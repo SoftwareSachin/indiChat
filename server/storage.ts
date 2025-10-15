@@ -74,11 +74,15 @@ export class DbStorage implements IStorage {
   }
 
   async updateUserStatus(id: string, isOnline: boolean, lastSeen?: Date): Promise<void> {
+    const updateData: any = { isOnline };
+    
+    // Only update lastSeen when going offline or explicitly provided
+    if (!isOnline || lastSeen) {
+      updateData.lastSeen = lastSeen || new Date();
+    }
+    
     await db.update(users)
-      .set({ 
-        isOnline, 
-        lastSeen: lastSeen || new Date() 
-      })
+      .set(updateData)
       .where(eq(users.id, id));
   }
 
