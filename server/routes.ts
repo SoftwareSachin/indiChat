@@ -196,6 +196,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Profile Routes
+  app.get("/api/user/profile", authMiddleware, async (req, res) => {
+    try {
+      const userId = (req as any).user.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch profile" });
+    }
+  });
+
+  app.patch("/api/user/update", authMiddleware, async (req, res) => {
+    try {
+      const userId = (req as any).user.userId;
+      const { username, preferredLanguage, bio } = req.body;
+      
+      const updateData: any = {};
+      if (username) updateData.username = username;
+      if (preferredLanguage) updateData.preferredLanguage = preferredLanguage;
+      if (bio !== undefined) updateData.bio = bio;
+
+      const user = await storage.updateUser(userId, updateData);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
+
+  app.post("/api/user/upload-profile-image", authMiddleware, upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      const userId = (req as any).user.userId;
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      
+      const user = await storage.updateUser(userId, { profileImage: base64Image });
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ profileImage: user.profileImage });
+    } catch (error) {
+      console.error("Profile image upload error:", error);
+      res.status(500).json({ error: "Failed to upload profile image" });
+    }
+  });
+
+  // Notification Routes
+  app.get("/api/notifications", authMiddleware, async (req, res) => {
+    try {
+      const userId = (req as any).user.userId;
+      const notifications = await storage.getNotificationsByUser(userId);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", authMiddleware, async (req, res) => {
+    try {
+      const userId = (req as any).user.userId;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch unread count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", authMiddleware, async (req, res) => {
+    try {
+      await storage.markNotificationAsRead(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/mark-all-read", authMiddleware, async (req, res) => {
+    try {
+      const userId = (req as any).user.userId;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark all notifications as read" });
+    }
+  });
+
   // WebSocket handlers
   const connectedUsers = new Map<string, { 
     id: string; 
