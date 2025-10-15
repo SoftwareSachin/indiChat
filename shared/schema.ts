@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   preferredLanguage: text("preferred_language").notNull().default('en'),
   profileImage: text("profile_image"),
   bio: text("bio"),
+  isOnline: boolean("is_online").notNull().default(false),
+  lastSeen: timestamp("last_seen"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
