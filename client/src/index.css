@@ -2,237 +2,235 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LIGHT MODE */
+/* ============================================
+   MATERIAL DESIGN 3 - COLOR SYSTEM
+   ============================================ */
+
+/* LIGHT MODE - Material Design 3 Tonal Palettes */
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
-
-  /* Automatic computation of border around primary / danger buttons */
-  --opaque-button-border-intensity: -8; /* In terms of percentages */
-
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
-
-  --background: 220 20% 98%;
-
-  --foreground: 220 20% 15%;
-
-  --border: 220 15% 90%;
-
-  --card: 0 0% 100%;
-
-  --card-foreground: 220 20% 15%;
-
-  --card-border: 220 15% 95%;
-
-  --sidebar: 220 15% 95%;
-
-  --sidebar-foreground: 220 20% 15%;
-
-  --sidebar-border: 220 15% 88%;
-
-  --sidebar-primary: 220 85% 55%;
-
-  --sidebar-primary-foreground: 0 0% 100%;
-
-  --sidebar-accent: 220 15% 92%;
-
-  --sidebar-accent-foreground: 220 20% 15%;
-
-  --sidebar-ring: 220 85% 55%;
-
-  --popover: 220 15% 96%;
-
-  --popover-foreground: 220 20% 15%;
-
-  --popover-border: 220 15% 91%;
-
-  --primary: 220 85% 55%;
-
+  /* Material Design 3 Primary Palette */
+  --primary: 220 90% 56%;
   --primary-foreground: 0 0% 100%;
-
-  --secondary: 220 10% 91%;
-
-  --secondary-foreground: 220 20% 15%;
-
-  --muted: 220 12% 94%;
-
-  --muted-foreground: 220 10% 45%;
-
-  --accent: 220 18% 93%;
-
-  --accent-foreground: 220 20% 15%;
-
-  --destructive: 0 70% 55%;
-
+  --on-primary: 0 0% 100%;
+  --primary-container: 220 100% 95%;
+  --on-primary-container: 220 100% 10%;
+  
+  /* Secondary Palette */
+  --secondary: 220 16% 36%;
+  --secondary-foreground: 0 0% 100%;
+  --on-secondary: 0 0% 100%;
+  --secondary-container: 220 30% 90%;
+  --on-secondary-container: 220 30% 10%;
+  
+  /* Tertiary Palette */
+  --tertiary: 280 45% 50%;
+  --tertiary-foreground: 0 0% 100%;
+  --tertiary-container: 280 50% 90%;
+  --on-tertiary-container: 280 60% 20%;
+  
+  /* Surface & Background */
+  --background: 220 20% 99%;
+  --foreground: 220 20% 10%;
+  --on-background: 220 20% 10%;
+  
+  --surface: 220 20% 99%;
+  --surface-variant: 220 15% 95%;
+  --surface-container-lowest: 0 0% 100%;
+  --surface-container-low: 220 25% 98%;
+  --surface-container: 220 20% 96%;
+  --surface-container-high: 220 15% 94%;
+  --surface-container-highest: 220 12% 92%;
+  --on-surface: 220 20% 10%;
+  --on-surface-variant: 220 12% 30%;
+  
+  /* Outline & Borders */
+  --outline: 220 12% 50%;
+  --outline-variant: 220 15% 80%;
+  --border: 220 15% 85%;
+  
+  /* Cards */
+  --card: 0 0% 100%;
+  --card-foreground: 220 20% 10%;
+  --card-border: 220 15% 90%;
+  
+  /* Error Palette */
+  --error: 0 72% 51%;
+  --on-error: 0 0% 100%;
+  --error-container: 0 100% 95%;
+  --on-error-container: 0 80% 15%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-
-  --input: 220 15% 80%;
-  --ring: 220 85% 55%;
-  --chart-1: 220 85% 50%;
-  --chart-2: 160 60% 50%;
-  --chart-3: 280 65% 55%;
-  --chart-4: 30 80% 50%;
-  --chart-5: 340 75% 55%;
-
-  --font-sans: Inter, Noto Sans, Noto Sans Devanagari, Noto Sans Tamil, Noto Sans Telugu, Noto Sans Bengali, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: JetBrains Mono, Menlo, monospace;
-  --radius: .5rem; /* 8px */
-  --shadow-2xs: 0px 1px 2px 0px hsl(220 15% 15% / 0.05);
-  --shadow-xs: 0px 1px 3px 0px hsl(220 15% 15% / 0.08);
-  --shadow-sm: 0px 2px 4px -1px hsl(220 15% 15% / 0.06), 0px 1px 2px -1px hsl(220 15% 15% / 0.10);
-  --shadow: 0px 4px 6px -1px hsl(220 15% 15% / 0.08), 0px 2px 4px -2px hsl(220 15% 15% / 0.06);
-  --shadow-md: 0px 6px 12px -2px hsl(220 15% 15% / 0.10), 0px 3px 6px -3px hsl(220 15% 15% / 0.08);
-  --shadow-lg: 0px 10px 20px -4px hsl(220 15% 15% / 0.12), 0px 4px 8px -4px hsl(220 15% 15% / 0.08);
-  --shadow-xl: 0px 20px 30px -6px hsl(220 15% 15% / 0.15), 0px 8px 12px -6px hsl(220 15% 15% / 0.10);
-  --shadow-2xl: 0px 25px 50px -12px hsl(220 15% 15% / 0.20);
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
-
-  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
-
-  /* Fallback for older browsers */
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  
+  /* State Layers (Hover, Focus, Press) */
+  --state-hover: rgba(0, 0, 0, 0.08);
+  --state-focus: rgba(0, 0, 0, 0.12);
+  --state-press: rgba(0, 0, 0, 0.12);
+  --state-drag: rgba(0, 0, 0, 0.16);
+  
+  /* Elevation - MD3 uses tonal surfaces instead of shadows */
+  --elevation-1: 220 20% 98%;
+  --elevation-2: 220 20% 96%;
+  --elevation-3: 220 15% 94%;
+  --elevation-4: 220 15% 92%;
+  --elevation-5: 220 12% 90%;
+  
+  /* Additional UI Elements */
+  --input: 220 15% 85%;
+  --ring: 220 90% 56%;
+  --muted: 220 15% 96%;
+  --muted-foreground: 220 10% 40%;
+  --accent: 220 20% 95%;
+  --accent-foreground: 220 20% 10%;
+  
+  /* Popover */
+  --popover: 220 20% 99%;
+  --popover-foreground: 220 20% 10%;
+  --popover-border: 220 15% 90%;
+  
+  /* Sidebar */
+  --sidebar: 220 20% 98%;
+  --sidebar-foreground: 220 20% 10%;
+  --sidebar-border: 220 15% 88%;
+  --sidebar-primary: 220 90% 56%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 15% 94%;
+  --sidebar-accent-foreground: 220 20% 10%;
+  --sidebar-ring: 220 90% 56%;
+  
+  /* Material Design 3 Spacing System */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  
+  /* Material Design 3 Border Radius */
+  --radius-none: 0;
+  --radius-xs: 0.25rem;     /* 4px - Extra small */
+  --radius-sm: 0.5rem;      /* 8px - Small */
+  --radius-md: 0.75rem;     /* 12px - Medium */
+  --radius-lg: 1rem;        /* 16px - Large */
+  --radius-xl: 1.75rem;     /* 28px - Extra large */
+  --radius-full: 9999px;    /* Full round */
+  --radius: 0.75rem;        /* Default */
+  
+  /* Typography - Material Design 3 */
+  --font-sans: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Georgia', serif;
+  --font-mono: 'Roboto Mono', 'JetBrains Mono', monospace;
+  
+  /* Chart Colors */
+  --chart-1: 220 90% 56%;
+  --chart-2: 160 70% 50%;
+  --chart-3: 280 60% 55%;
+  --chart-4: 30 90% 55%;
+  --chart-5: 340 80% 60%;
 }
 
+/* DARK MODE - Material Design 3 Dark Palettes */
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
-
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
-
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
-
-  --background: 220 20% 10%;
-
-  --foreground: 220 10% 95%;
-
+  /* Primary Palette */
+  --primary: 220 90% 70%;
+  --primary-foreground: 220 100% 10%;
+  --on-primary: 220 100% 10%;
+  --primary-container: 220 80% 30%;
+  --on-primary-container: 220 100% 90%;
+  
+  /* Secondary Palette */
+  --secondary: 220 20% 70%;
+  --secondary-foreground: 220 20% 10%;
+  --on-secondary: 220 20% 10%;
+  --secondary-container: 220 20% 30%;
+  --on-secondary-container: 220 25% 90%;
+  
+  /* Tertiary Palette */
+  --tertiary: 280 50% 70%;
+  --tertiary-foreground: 280 60% 15%;
+  --tertiary-container: 280 45% 30%;
+  --on-tertiary-container: 280 60% 90%;
+  
+  /* Surface & Background */
+  --background: 220 15% 6%;
+  --foreground: 220 10% 90%;
+  --on-background: 220 10% 90%;
+  
+  --surface: 220 15% 10%;
+  --surface-variant: 220 12% 20%;
+  --surface-container-lowest: 220 20% 4%;
+  --surface-container-low: 220 18% 8%;
+  --surface-container: 220 15% 12%;
+  --surface-container-high: 220 12% 16%;
+  --surface-container-highest: 220 10% 22%;
+  --on-surface: 220 10% 90%;
+  --on-surface-variant: 220 8% 70%;
+  
+  /* Outline & Borders */
+  --outline: 220 8% 60%;
+  --outline-variant: 220 10% 30%;
   --border: 220 10% 25%;
-
-  --card: 220 15% 14%;
-
-  --card-foreground: 220 10% 95%;
-
+  
+  /* Cards */
+  --card: 220 15% 12%;
+  --card-foreground: 220 10% 90%;
   --card-border: 220 10% 20%;
-
-  --sidebar: 220 15% 18%;
-
-  --sidebar-foreground: 220 10% 95%;
-
-  --sidebar-border: 220 10% 23%;
-
-  --sidebar-primary: 220 75% 65%;
-
-  --sidebar-primary-foreground: 220 10% 10%;
-
-  --sidebar-accent: 220 12% 22%;
-
-  --sidebar-accent-foreground: 220 10% 95%;
-
-  --sidebar-ring: 220 75% 65%;
-
-  --popover: 220 15% 16%;
-
-  --popover-foreground: 220 10% 95%;
-
-  --popover-border: 220 10% 22%;
-
-  --primary: 220 75% 65%;
-
-  --primary-foreground: 220 15% 10%;
-
-  --secondary: 220 10% 24%;
-
-  --secondary-foreground: 220 10% 95%;
-
-  --muted: 220 10% 20%;
-
-  --muted-foreground: 220 8% 70%;
-
-  --accent: 220 15% 22%;
-
-  --accent-foreground: 220 10% 95%;
-
-  --destructive: 0 65% 60%;
-
+  
+  /* Error Palette */
+  --error: 0 80% 65%;
+  --on-error: 0 100% 10%;
+  --error-container: 0 60% 25%;
+  --on-error-container: 0 100% 90%;
+  --destructive: 0 80% 65%;
   --destructive-foreground: 0 0% 100%;
-
-  --input: 220 10% 35%;
-  --ring: 220 75% 65%;
-  --chart-1: 220 75% 70%;
-  --chart-2: 160 55% 55%;
-  --chart-3: 280 60% 70%;
-  --chart-4: 30 75% 65%;
-  --chart-5: 340 70% 70%;
-
-  --shadow-2xs: 0px 1px 2px 0px hsl(220 20% 5% / 0.40);
-  --shadow-xs: 0px 1px 3px 0px hsl(220 20% 5% / 0.50);
-  --shadow-sm: 0px 2px 4px -1px hsl(220 20% 5% / 0.45), 0px 1px 2px -1px hsl(220 20% 5% / 0.60);
-  --shadow: 0px 4px 6px -1px hsl(220 20% 5% / 0.50), 0px 2px 4px -2px hsl(220 20% 5% / 0.45);
-  --shadow-md: 0px 6px 12px -2px hsl(220 20% 5% / 0.55), 0px 3px 6px -3px hsl(220 20% 5% / 0.50);
-  --shadow-lg: 0px 10px 20px -4px hsl(220 20% 5% / 0.60), 0px 4px 8px -4px hsl(220 20% 5% / 0.50);
-  --shadow-xl: 0px 20px 30px -6px hsl(220 20% 5% / 0.70), 0px 8px 12px -6px hsl(220 20% 5% / 0.60);
-  --shadow-2xl: 0px 25px 50px -12px hsl(220 20% 5% / 0.80);
-
-  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
-
-  /* Fallback for older browsers */
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  
+  /* State Layers */
+  --state-hover: rgba(255, 255, 255, 0.08);
+  --state-focus: rgba(255, 255, 255, 0.12);
+  --state-press: rgba(255, 255, 255, 0.12);
+  --state-drag: rgba(255, 255, 255, 0.16);
+  
+  /* Elevation - Tonal surfaces */
+  --elevation-1: 220 15% 13%;
+  --elevation-2: 220 15% 16%;
+  --elevation-3: 220 12% 19%;
+  --elevation-4: 220 12% 22%;
+  --elevation-5: 220 10% 24%;
+  
+  /* Additional UI */
+  --input: 220 10% 30%;
+  --ring: 220 90% 70%;
+  --muted: 220 10% 20%;
+  --muted-foreground: 220 8% 65%;
+  --accent: 220 12% 22%;
+  --accent-foreground: 220 10% 90%;
+  
+  /* Popover */
+  --popover: 220 15% 12%;
+  --popover-foreground: 220 10% 90%;
+  --popover-border: 220 10% 22%;
+  
+  /* Sidebar */
+  --sidebar: 220 15% 10%;
+  --sidebar-foreground: 220 10% 90%;
+  --sidebar-border: 220 10% 20%;
+  --sidebar-primary: 220 90% 70%;
+  --sidebar-primary-foreground: 220 100% 10%;
+  --sidebar-accent: 220 12% 18%;
+  --sidebar-accent-foreground: 220 10% 90%;
+  --sidebar-ring: 220 90% 70%;
+  
+  /* Chart Colors */
+  --chart-1: 220 90% 70%;
+  --chart-2: 160 70% 60%;
+  --chart-3: 280 65% 70%;
+  --chart-4: 30 90% 65%;
+  --chart-5: 340 80% 70%;
 }
+
+/* ============================================
+   MATERIAL DESIGN 3 - TYPOGRAPHY SCALE
+   ============================================ */
 
 @layer base {
   * {
@@ -242,112 +240,279 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* MD3 Display Styles - Largest text */
+  .display-large {
+    font-size: 3.5625rem;    /* 57px */
+    line-height: 4rem;       /* 64px */
+    font-weight: 400;
+    letter-spacing: -0.25px;
+  }
+  
+  .display-medium {
+    font-size: 2.8125rem;    /* 45px */
+    line-height: 3.25rem;    /* 52px */
+    font-weight: 400;
+  }
+  
+  .display-small {
+    font-size: 2.25rem;      /* 36px */
+    line-height: 2.75rem;    /* 44px */
+    font-weight: 400;
+  }
+  
+  /* MD3 Headline Styles */
+  .headline-large {
+    font-size: 2rem;         /* 32px */
+    line-height: 2.5rem;     /* 40px */
+    font-weight: 400;
+  }
+  
+  .headline-medium {
+    font-size: 1.75rem;      /* 28px */
+    line-height: 2.25rem;    /* 36px */
+    font-weight: 400;
+  }
+  
+  .headline-small {
+    font-size: 1.5rem;       /* 24px */
+    line-height: 2rem;       /* 32px */
+    font-weight: 400;
+  }
+  
+  /* MD3 Title Styles */
+  .title-large {
+    font-size: 1.375rem;     /* 22px */
+    line-height: 1.75rem;    /* 28px */
+    font-weight: 400;
+  }
+  
+  .title-medium {
+    font-size: 1rem;         /* 16px */
+    line-height: 1.5rem;     /* 24px */
+    font-weight: 500;
+  }
+  
+  .title-small {
+    font-size: 0.875rem;     /* 14px */
+    line-height: 1.25rem;    /* 20px */
+    font-weight: 500;
+  }
+  
+  /* MD3 Body Styles */
+  .body-large {
+    font-size: 1rem;         /* 16px */
+    line-height: 1.5rem;     /* 24px */
+    font-weight: 400;
+  }
+  
+  .body-medium {
+    font-size: 0.875rem;     /* 14px */
+    line-height: 1.25rem;    /* 20px */
+    font-weight: 400;
+  }
+  
+  .body-small {
+    font-size: 0.75rem;      /* 12px */
+    line-height: 1rem;       /* 16px */
+    font-weight: 400;
+  }
+  
+  /* MD3 Label Styles */
+  .label-large {
+    font-size: 0.875rem;     /* 14px */
+    line-height: 1.25rem;    /* 20px */
+    font-weight: 500;
+  }
+  
+  .label-medium {
+    font-size: 0.75rem;      /* 12px */
+    line-height: 1rem;       /* 16px */
+    font-weight: 500;
+  }
+  
+  .label-small {
+    font-size: 0.6875rem;    /* 11px */
+    line-height: 1rem;       /* 16px */
+    font-weight: 500;
+  }
 }
 
-/**
- * Using the elevate system.
- * Automatic contrast adjustment.
- *
- * <element className="hover-elevate" />
- * <element className="active-elevate-2" />
- *
- * // Using the tailwind utility when a data attribute is "on"
- * <element className="toggle-elevate data-[state=on]:toggle-elevated" />
- * // Or manually controlling the toggle state
- * <element className="toggle-elevate toggle-elevated" />
- *
- * Elevation systems have to handle many states.
- * - not-hovered, vs. hovered vs. active  (three mutually exclusive states)
- * - toggled or not
- * - focused or not (this is not handled with these utilities)
- *
- * Even without handling focused or not, this is six possible combinations that
- * need to be distinguished from eachother visually.
- */
-@layer utilities {
+/* ============================================
+   MATERIAL DESIGN 3 - ELEVATION & STATES
+   ============================================ */
 
-  /* Hide ugly search cancel button in Chrome until we can style it properly */
+@layer utilities {
+  /* MD3 Elevation Levels (using tonal surfaces) */
+  .elevation-0 {
+    background-color: hsl(var(--surface));
+  }
+  
+  .elevation-1 {
+    background-color: hsl(var(--elevation-1));
+  }
+  
+  .elevation-2 {
+    background-color: hsl(var(--elevation-2));
+  }
+  
+  .elevation-3 {
+    background-color: hsl(var(--elevation-3));
+  }
+  
+  .elevation-4 {
+    background-color: hsl(var(--elevation-4));
+  }
+  
+  .elevation-5 {
+    background-color: hsl(var(--elevation-5));
+  }
+  
+  /* MD3 State Layers */
+  .state-layer-hover:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--state-hover);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  
+  .state-layer-focus:focus::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--state-focus);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  
+  .state-layer-press:active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--state-press);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  
+  /* Hide search cancel button */
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
   }
-
-  /* Placeholder styling for contentEditable div */
+  
+  /* Placeholder styling */
   [contenteditable][data-placeholder]:empty::before {
     content: attr(data-placeholder);
     color: hsl(var(--muted-foreground));
     pointer-events: none;
   }
-
-  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
-   * buttons/badges can remove the automatic brightness adjustment on interactions
-   * and program their own. */
-  .no-default-hover-elevate {}
-
-  .no-default-active-elevate {}
-
-
-  /**
-   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
-   * This way they can stack/compound. Both will overlap the parent's borders!
-   * So borders will be automatically adjusted both on toggle, and hover/active,
-   * and they will be compounded.
-   */
-  .toggle-elevate::before,
-  .toggle-elevate-2::before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0px;
-    border-radius: inherit;
-    z-index: -1;
+  
+  /* MD3 Surface Containers */
+  .surface-container-lowest {
+    background-color: hsl(var(--surface-container-lowest));
   }
-
-  .toggle-elevate.toggle-elevated::before {
-    background-color: var(--elevate-2);
+  
+  .surface-container-low {
+    background-color: hsl(var(--surface-container-low));
   }
-
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
-  .border.toggle-elevate::before {
-    inset: -1px;
+  
+  .surface-container {
+    background-color: hsl(var(--surface-container));
   }
-
-  /* Does not work on elements with overflow:hidden! */
-  .hover-elevate:not(.no-default-hover-elevate),
-  .active-elevate:not(.no-default-active-elevate),
-  .hover-elevate-2:not(.no-default-hover-elevate),
-  .active-elevate-2:not(.no-default-active-elevate) {
-    position: relative;
-    z-index: 0;
+  
+  .surface-container-high {
+    background-color: hsl(var(--surface-container-high));
   }
-
-  .hover-elevate:not(.no-default-hover-elevate)::after,
-  .active-elevate:not(.no-default-active-elevate)::after,
-  .hover-elevate-2:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:not(.no-default-active-elevate)::after {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0px;
-    border-radius: inherit;
-    z-index: 999;
+  
+  .surface-container-highest {
+    background-color: hsl(var(--surface-container-highest));
   }
+}
 
-  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-1);
+/* ============================================
+   MATERIAL DESIGN 3 - COMPONENT PATTERNS
+   ============================================ */
+
+@layer components {
+  /* MD3 Button Patterns */
+  .btn-filled {
+    @apply bg-primary text-primary-foreground hover:shadow-md transition-shadow;
   }
-
-  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-2);
+  
+  .btn-outlined {
+    @apply border border-outline bg-transparent text-primary hover:bg-primary/10;
   }
+  
+  .btn-text {
+    @apply bg-transparent text-primary hover:bg-primary/10;
+  }
+  
+  /* MD3 Card Pattern */
+  .card-elevated {
+    @apply bg-surface-container-low rounded-xl border-0 shadow-sm;
+  }
+  
+  .card-filled {
+    @apply bg-surface-container-highest rounded-xl border-0;
+  }
+  
+  .card-outlined {
+    @apply bg-surface border border-outline-variant rounded-xl;
+  }
+  
+  /* MD3 List Item Pattern */
+  .list-item {
+    @apply px-4 py-3 hover:bg-surface-container-high rounded-lg transition-colors;
+  }
+  
+  /* MD3 Divider */
+  .divider {
+    @apply border-t border-outline-variant;
+  }
+  
+  /* MD3 Icon Button */
+  .icon-button {
+    @apply w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest transition-colors;
+  }
+  
+  /* MD3 FAB (Floating Action Button) */
+  .fab {
+    @apply bg-primary-container text-on-primary-container shadow-lg hover:shadow-xl transition-shadow rounded-2xl px-4 py-3;
+  }
+  
+  /* MD3 Navigation Rail Item */
+  .nav-rail-item {
+    @apply flex flex-col items-center gap-1 py-3 px-4 rounded-2xl hover:bg-surface-container-highest transition-colors;
+  }
+  
+  /* MD3 Chip */
+  .chip {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high text-on-surface-variant label-large;
+  }
+}
 
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
-    inset: -1px;
+/* ============================================
+   SCROLLBAR STYLING (SUBTLE)
+   ============================================ */
+
+@layer utilities {
+  /* Custom scrollbar for modern browsers */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--outline-variant));
+    border-radius: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--outline));
   }
 }
