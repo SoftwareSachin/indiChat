@@ -25,6 +25,7 @@ console.log(`🔑 Loaded ${API_KEYS.length} Gemini API key(s) for rotation`);
 
 // Get current AI client with active key, returning both client and the key index used
 function getAIClient(): { client: GoogleGenAI; keyIndex: number } {
+  console.log(`🔑 Using Gemini API key #${currentKeyIndex + 1}/${API_KEYS.length}`);
   return {
     client: new GoogleGenAI({ apiKey: API_KEYS[currentKeyIndex] }),
     keyIndex: currentKeyIndex
@@ -144,7 +145,7 @@ export async function translateText(
     });
 
     const translatedText = response.text?.trim() || text;
-    console.log(`✅ GEMINI RESPONSE: "${translatedText.substring(0, 50)}..."`);
+    console.log(`✅ GEMINI TRANSLATION SUCCESS (key #${currentKeyIndex + 1}): "${translatedText.substring(0, 50)}..."`);
     
     return translatedText;
   } catch (error) {
@@ -274,7 +275,7 @@ export async function generateSpeech(text: string, languageCode: string): Promis
 
         if (audioPart?.inlineData?.data) {
           const audioBuffer = Buffer.from(audioPart.inlineData.data, 'base64');
-          console.log(`✅ GEMINI TTS SUCCESS: Generated ${audioBuffer.length} bytes with voice ${voiceName}`);
+          console.log(`✅ GEMINI TTS SUCCESS (key #${currentKeyIndex + 1}): Generated ${audioBuffer.length} bytes with voice ${voiceName}`);
           return audioBuffer;
         }
 
