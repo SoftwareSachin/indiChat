@@ -7,6 +7,7 @@ import { AudioRecorder } from "@/components/AudioRecorder";
 import { TranslationIndicator } from "@/components/TranslationIndicator";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { RecordingIndicator } from "@/components/RecordingIndicator";
+import { UserStatusIndicator } from "@/components/UserStatusIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
@@ -57,7 +58,7 @@ export default function ChatPage() {
     currentUser?.preferredLanguage || 'en'
   );
 
-  const { messages, connectionStatus, typingUsers, recordingUsers, translatedMessages } = useChatStore();
+  const { messages, connectionStatus, typingUsers, recordingUsers, userStatuses, translatedMessages } = useChatStore();
   
   const {
     sendMessage,
@@ -108,6 +109,9 @@ export default function ChatPage() {
 
   const typingUsersList = Array.from(typingUsers.values());
   const recordingUsersList = Array.from(recordingUsers.values());
+  const userStatusList = Array.from(userStatuses.values()).filter(
+    status => status.userId !== currentUser.id
+  );
 
   if (!currentUser) {
     return null;
@@ -158,6 +162,21 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
+
+        {userStatusList.length > 0 && (
+          <div className="bg-surface-container dark:bg-surface-container-highest border-b border-outline-variant px-4 md:px-6 py-2">
+            <div className="max-w-5xl mx-auto flex items-center gap-4 overflow-x-auto">
+              {userStatusList.map((status) => (
+                <UserStatusIndicator
+                  key={status.userId}
+                  userName={status.username}
+                  isOnline={status.isOnline}
+                  lastSeen={status.lastSeen}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         <ScrollArea className="flex-1 bg-background dark:bg-background">
           <div ref={scrollRef} className="p-4 md:p-6 space-y-4 max-w-5xl mx-auto">
