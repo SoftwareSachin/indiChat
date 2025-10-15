@@ -16,6 +16,7 @@ interface ChatState {
   connectionStatus: ConnectionState;
   isTyping: boolean;
   typingUsers: Map<string, string>;
+  recordingUsers: Map<string, string>;
   translatedMessages: Map<string, { content: string; language: string }>;
   
   // Actions
@@ -26,6 +27,8 @@ interface ChatState {
   addTranslation: (messageId: string, content: string, language: string) => void;
   setUserTyping: (userId: string, username: string) => void;
   removeUserTyping: (userId: string) => void;
+  setUserRecording: (userId: string, username: string) => void;
+  removeUserRecording: (userId: string) => void;
   clearMessages: () => void;
 }
 
@@ -35,6 +38,7 @@ export const useChatStore = create<ChatState>((set) => ({
   connectionStatus: 'connecting',
   isTyping: false,
   typingUsers: new Map(),
+  recordingUsers: new Map(),
   translatedMessages: new Map(),
 
   setUser: (user) => set({ user }),
@@ -63,6 +67,18 @@ export const useChatStore = create<ChatState>((set) => ({
     const newTypingUsers = new Map(state.typingUsers);
     newTypingUsers.delete(userId);
     return { typingUsers: newTypingUsers };
+  }),
+
+  setUserRecording: (userId, username) => set((state) => {
+    const newRecordingUsers = new Map(state.recordingUsers);
+    newRecordingUsers.set(userId, username);
+    return { recordingUsers: newRecordingUsers };
+  }),
+  
+  removeUserRecording: (userId) => set((state) => {
+    const newRecordingUsers = new Map(state.recordingUsers);
+    newRecordingUsers.delete(userId);
+    return { recordingUsers: newRecordingUsers };
   }),
   
   clearMessages: () => set({ messages: [] }),
