@@ -168,9 +168,40 @@ export async function transcribeSpeech(audioData: Buffer, languageCode: string, 
 
     console.log(`🎤 WHISPER TRANSCRIPTION: ${whisperLanguage}, mime: ${mimeType}`);
 
-    // Convert audio buffer to appropriate format for Whisper
-    // Whisper works best with common audio formats
-    const audioFile = new File([audioData], 'audio.wav', { type: 'audio/wav' });
+    // Guard against missing or invalid mimeType
+    if (!mimeType || typeof mimeType !== 'string') {
+      console.warn('⚠️ No mimeType provided, defaulting to audio/webm');
+      mimeType = 'audio/webm';
+    }
+
+    // Normalize mimeType by stripping codec information
+    // Whisper expects base media type only (e.g., "audio/webm" not "audio/webm;codecs=opus")
+    const baseMimeType = mimeType.split(';')[0]?.trim() || 'audio/webm';
+    
+    // Determine correct file extension based on mimeType
+    let fileExtension = 'webm';
+    
+    if (mimeType.includes('webm')) {
+      fileExtension = 'webm';
+    } else if (mimeType.includes('ogg')) {
+      fileExtension = 'ogg';
+    } else if (mimeType.includes('wav')) {
+      fileExtension = 'wav';
+    } else if (mimeType.includes('mp3')) {
+      fileExtension = 'mp3';
+    } else if (mimeType.includes('m4a') || mimeType.includes('mp4')) {
+      fileExtension = 'm4a';
+    } else if (mimeType.includes('mpeg') || mimeType.includes('aac')) {
+      fileExtension = 'mp3';
+    } else {
+      console.warn(`⚠️ Unknown mimeType: ${mimeType}, defaulting to webm`);
+      fileExtension = 'webm';
+    }
+
+    // Create audio file with normalized base mimetype (no codec info)
+    const audioFile = new File([audioData], `audio.${fileExtension}`, { type: baseMimeType });
+    
+    console.log(`📁 Created audio file: audio.${fileExtension} (${baseMimeType}), size: ${audioData.length} bytes`);
 
     // Quick connection test first
     const response = await retryWithRotation(async (openai) => {
@@ -186,11 +217,17 @@ export async function transcribeSpeech(audioData: Buffer, languageCode: string, 
     });
 
     const transcribedText = response || "";
-    console.log(`✅ WHISPER TRANSCRIPTION: "${transcribedText.substring(0, 50)}..."`);
+    console.log(`✅ WHISPER TRANSCRIPTION SUCCESS: "${transcribedText.substring(0, 100)}..."`);
 
     return transcribedText;
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ WHISPER TRANSCRIPTION ERROR:", error);
+    console.error("❌ Error details:", {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      type: error.type,
+    });
     
     // Since OpenAI is not accessible, return a helpful message
     const languageNames: Record<string, string> = {
@@ -210,7 +247,16 @@ export async function transcribeSpeech(audioData: Buffer, languageCode: string, 
     
     const languageName = languageNames[languageCode] || languageCode;
     
+    // Provide specific error messages based on error type
+    if (error.message?.includes('quota') || error.message?.includes('insufficient_quota')) {
+      return `🎤 [Voice message in ${languageName}] - API quota exceeded. Please wait for quota reset or upgrade your OpenAI plan.`;
+    } else if (error.message?.includes('network') || error.message?.includes('Connection')) {
+      return `🎤 [Voice message in ${languageName}] - Network error. Please check your internet connection and try again.`;
+    } else if (error.message?.includes('Invalid file format')) {
+      return `🎤 [Voice message in ${languageName}] - Audio format error. Please try recording again.`;
+    }
+    
     // Return a user-friendly message instead of crashing
-    return `🎤 [Voice message in ${languageName}] - OpenAI Whisper API is currently unreachable from your network. The audio was received but transcription is temporarily unavailable.`;
+    return `🎤 [Voice message in ${languageName}] - Transcription temporarily unavailable. The audio was received but could not be processed.`;
   }
 }
