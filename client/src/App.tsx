@@ -10,6 +10,7 @@ import ChatPage from "@/pages/ChatPage";
 import InvitePage from "@/pages/InvitePage";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/invite/:inviteCode" component={InvitePage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/settings" component={SettingsPage} />
+      <Route path="/notifications" component={NotificationsPage} />
       <Route component={NotFound} />
     </Switch>
   );
