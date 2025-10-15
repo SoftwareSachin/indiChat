@@ -441,7 +441,8 @@
   }
   
   .btn-outlined {
-    @apply border border-outline bg-transparent text-primary hover:bg-primary/10;
+    @apply border bg-transparent text-primary hover:bg-primary/10;
+    border-color: hsl(var(--outline));
   }
   
   .btn-text {
@@ -458,7 +459,8 @@
   }
   
   .card-outlined {
-    @apply bg-surface border border-outline-variant rounded-xl;
+    @apply bg-surface border rounded-xl;
+    border-color: hsl(var(--outline-variant));
   }
   
   /* MD3 List Item Pattern */
@@ -468,7 +470,8 @@
   
   /* MD3 Divider */
   .divider {
-    @apply border-t border-outline-variant;
+    @apply border-t;
+    border-color: hsl(var(--outline-variant));
   }
   
   /* MD3 Icon Button */
