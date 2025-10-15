@@ -306,18 +306,8 @@ export default function RoomsPage() {
                 <div>
                   <h3 className="text-xl font-semibold text-on-surface">No rooms yet</h3>
                   <p className="text-sm text-on-surface-variant mt-2">
-                    Create your first room or join an existing one to get started
+                    Create your first room or join an existing one using the buttons above
                   </p>
-                </div>
-                <div className="flex gap-3 justify-center">
-                  <Button variant="outline" onClick={() => setIsJoinDialogOpen(true)} className="gap-2">
-                    <Users className="w-4 h-4" />
-                    Join Room
-                  </Button>
-                  <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-                    <Plus className="w-4 h-4" />
-                    Create Room
-                  </Button>
                 </div>
               </div>
             </div>
