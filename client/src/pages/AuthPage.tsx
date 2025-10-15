@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { MessageSquare, User, Lock, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type LanguageCode, SUPPORTED_LANGUAGES } from "@/lib/languages";
-import { Separator } from "@/components/ui/separator";
 import { AuthManager } from "@/lib/auth-manager";
 
 export default function AuthPage() {
@@ -41,7 +40,6 @@ export default function AuthPage() {
         throw new Error(data.error || "Authentication failed");
       }
 
-      // Use AuthManager to set auth data
       const authManager = AuthManager.getInstance();
       authManager.setAuthData(data.token, data.user);
 
@@ -70,28 +68,47 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
-            {isLogin ? "Sign in" : "Create account"}
-          </CardTitle>
-          <CardDescription>
-            {isLogin 
-              ? "Enter your credentials to access your chat rooms" 
-              : "Create an account to start chatting with real-time translation"}
-          </CardDescription>
+      <div className="w-full max-w-md space-y-8">
+        {/* Brand Header */}
+        <div className="text-center space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+            <MessageSquare className="w-9 h-9 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="headline-large text-on-background">Xchat</h1>
+            <p className="body-large text-on-surface-variant mt-2">
+              Global Multilingual Communication
+            </p>
+          </div>
+        </div>
+
+        {/* Auth Card */}
+        <div className="card-outlined p-8 space-y-6">
+          <div className="space-y-2">
+            <h2 className="title-large text-on-surface">
+              {isLogin ? "Sign in to your account" : "Create your account"}
+            </h2>
+            <p className="body-medium text-on-surface-variant">
+              {isLogin 
+                ? "Enter your credentials to access your chat rooms" 
+                : "Join the global conversation with real-time translation"}
+            </p>
+          </div>
+
           {!isLogin && (
-            <div className="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
-              <p className="text-xs text-yellow-600 dark:text-yellow-500">
-                <strong>Note:</strong> Multiple accounts in the same browser will share the same session. For testing with multiple users, please use different browsers or incognito/private windows.
+            <div className="surface-container-high rounded-xl p-4">
+              <p className="body-small text-on-surface-variant">
+                <strong className="text-on-surface">Note:</strong> Multiple accounts in the same browser will share the same session. For testing with multiple users, use different browsers or incognito windows.
               </p>
             </div>
           )}
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="label-large text-on-surface flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Username
+              </Label>
               <Input
                 id="username"
                 type="text"
@@ -100,11 +117,16 @@ export default function AuthPage() {
                 placeholder="Enter your username"
                 required
                 autoComplete="username"
+                className="body-large h-12"
+                data-testid="input-username"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="label-large text-on-surface flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -113,20 +135,25 @@ export default function AuthPage() {
                 placeholder="Enter your password"
                 required
                 autoComplete={isLogin ? "current-password" : "new-password"}
+                className="body-large h-12"
+                data-testid="input-password"
               />
             </div>
 
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="language">Preferred Language</Label>
+                <Label htmlFor="language" className="label-large text-on-surface flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Preferred Language
+                </Label>
                 <Select value={preferredLanguage} onValueChange={(value) => setPreferredLanguage(value as LanguageCode)}>
-                  <SelectTrigger>
+                  <SelectTrigger id="language" className="body-large h-12" data-testid="select-language">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {SUPPORTED_LANGUAGES.map((lang) => (
                       <SelectItem key={lang.code} value={lang.code}>
-                        {lang.name}
+                        {lang.name} ({lang.nativeName})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -134,23 +161,40 @@ export default function AuthPage() {
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : (isLogin ? "Sign in" : "Create account")}
-            </Button>
-
-            <Separator />
-
             <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 btn-filled label-large"
+              data-testid="button-submit"
             >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              {isLoading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+
+          <div className="divider"></div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="label-large text-primary hover:underline"
+              data-testid="button-toggle-mode"
+            >
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            </button>
+          </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="text-center space-y-2">
+          <p className="body-small text-on-surface-variant">
+            Supports 12 Indian regional languages
+          </p>
+          <p className="body-small text-on-surface-variant">
+            Real-time AI translation powered by Google Gemini
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

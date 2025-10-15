@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Copy, LogOut, MessageSquare, Lock, Globe } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Plus, Copy, MessageSquare, Lock, Globe, Users, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AuthManager } from "@/lib/auth-manager";
+import { AppSidebar } from "@/components/AppSidebar";
 
 interface Room {
   id: string;
@@ -41,7 +40,6 @@ export default function RoomsPage() {
     }
     fetchRooms();
 
-    // Listen for session changes from other tabs
     const authManager = AuthManager.getInstance();
     authManager.startListening(() => {
       toast({
@@ -176,180 +174,201 @@ export default function RoomsPage() {
     }
   };
 
-  const handleLogout = () => {
-    const authManager = AuthManager.getInstance();
-    authManager.clearAuth();
+  if (!user.id) {
     setLocation("/auth");
-  };
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
+    <div className="flex h-screen bg-background">
+      <AppSidebar />
+      
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">Chat Rooms</h1>
-              <p className="text-sm text-muted-foreground mt-1">Welcome back, {user.username}</p>
+              <h1 className="headline-large text-on-background">Chat Rooms</h1>
+              <p className="body-large text-on-surface-variant mt-1">
+                Join or create rooms to start chatting
+              </p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex gap-3">
+              <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="btn-outlined gap-2" data-testid="button-join-room">
+                    <Users className="w-5 h-5" />
+                    Join Room
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="title-large">Join a Room</DialogTitle>
+                    <DialogDescription className="body-medium">
+                      Enter the invite code to join an existing room
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="invite-code" className="label-large">Invite Code</Label>
+                      <Input
+                        id="invite-code"
+                        value={inviteCode}
+                        onChange={(e) => setInviteCode(e.target.value)}
+                        placeholder="Enter invite code"
+                        className="body-large"
+                        data-testid="input-invite-code"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleJoinRoom}
+                      disabled={isLoading || !inviteCode.trim()}
+                      className="w-full btn-filled"
+                      data-testid="button-submit-join"
+                    >
+                      {isLoading ? "Joining..." : "Join Room"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="btn-filled gap-2" data-testid="button-create-room">
+                    <Plus className="w-5 h-5" />
+                    Create Room
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="title-large">Create New Room</DialogTitle>
+                    <DialogDescription className="body-medium">
+                      Create a new chat room and invite members
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="room-name" className="label-large">Room Name</Label>
+                      <Input
+                        id="room-name"
+                        value={roomName}
+                        onChange={(e) => setRoomName(e.target.value)}
+                        placeholder="Enter room name"
+                        className="body-large"
+                        data-testid="input-room-name"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container">
+                      <div className="space-y-1">
+                        <Label htmlFor="private-room" className="title-small">Private Room</Label>
+                        <p className="body-small text-on-surface-variant">
+                          Only invited users can join
+                        </p>
+                      </div>
+                      <Switch
+                        id="private-room"
+                        checked={isPrivate}
+                        onCheckedChange={setIsPrivate}
+                        data-testid="switch-private"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleCreateRoom}
+                      disabled={isLoading || !roomName.trim()}
+                      className="w-full btn-filled"
+                      data-testid="button-submit-create"
+                    >
+                      {isLoading ? "Creating..." : "Create Room"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex gap-3 mb-8">
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Room
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create New Room</DialogTitle>
-                <DialogDescription>
-                  Create a chat room and share the invite link with others
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="room-name">Room Name</Label>
-                  <Input
-                    id="room-name"
-                    value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
-                    placeholder="Enter room name"
-                  />
-                </div>
-                <div className="flex items-center justify-between space-x-2">
-                  <Label htmlFor="private" className="flex flex-col space-y-1">
-                    <span>Private Room</span>
-                    <span className="font-normal text-sm text-muted-foreground">
-                      Only accessible via invite link
-                    </span>
-                  </Label>
-                  <Switch
-                    id="private"
-                    checked={isPrivate}
-                    onCheckedChange={setIsPrivate}
-                  />
-                </div>
-                <Button onClick={handleCreateRoom} disabled={isLoading || !roomName.trim()} className="w-full">
-                  {isLoading ? "Creating..." : "Create Room"}
-                </Button>
+          {/* Rooms Grid */}
+          {rooms.length === 0 ? (
+            <div className="surface-container rounded-2xl p-12 text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <MessageSquare className="w-8 h-8 text-primary" />
               </div>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">Join with Invite Code</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Join Room</DialogTitle>
-                <DialogDescription>
-                  Enter the invite code to join a room
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="invite-code">Invite Code</Label>
-                  <Input
-                    id="invite-code"
-                    value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value)}
-                    placeholder="Enter invite code"
-                  />
-                </div>
-                <Button onClick={handleJoinRoom} disabled={isLoading || !inviteCode.trim()} className="w-full">
-                  {isLoading ? "Joining..." : "Join Room"}
-                </Button>
+              <div>
+                <h3 className="title-large text-on-surface">No rooms yet</h3>
+                <p className="body-medium text-on-surface-variant mt-2">
+                  Create your first room or join an existing one to get started
+                </p>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {rooms.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">No rooms yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Create a room or join using an invite code</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {rooms.map((room) => (
-              <Card key={room.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation(`/chat/${room.id}`)}>
-                <CardHeader className="pb-3">
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {rooms.map((room) => (
+                <div
+                  key={room.id}
+                  className="card-outlined p-6 space-y-4 hover:shadow-md transition-shadow cursor-pointer group"
+                  onClick={() => setLocation(`/chat/${room.id}`)}
+                  data-testid={`room-card-${room.id}`}
+                >
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-lg">{room.name}</CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={room.isPrivate ? "secondary" : "outline"} className="text-xs">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <MessageSquare className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="title-medium text-on-surface truncate">{room.name}</h3>
+                        <div className="flex items-center gap-2 mt-1">
                           {room.isPrivate ? (
-                            <>
-                              <Lock className="w-3 h-3 mr-1" />
+                            <Badge variant="secondary" className="gap-1">
+                              <Lock className="w-3 h-3" />
                               Private
-                            </>
+                            </Badge>
                           ) : (
-                            <>
-                              <Globe className="w-3 h-3 mr-1" />
+                            <Badge variant="secondary" className="gap-1">
+                              <Globe className="w-3 h-3" />
                               Public
-                            </>
+                            </Badge>
                           )}
-                        </Badge>
+                        </div>
                       </div>
                     </div>
+                    <ArrowRight className="w-5 h-5 text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </CardHeader>
-                <Separator />
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Invite Code</p>
-                      <code className="text-xs bg-muted px-2 py-1 rounded">{room.inviteCode}</code>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          copyInviteCode(room.inviteCode);
-                        }}
-                        data-testid={`button-copy-code-${room.id}`}
-                      >
-                        <Copy className="w-4 h-4 mr-2" />
-                        Copy Code
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          copyInviteLink(room.inviteCode);
-                        }}
-                        data-testid={`button-copy-link-${room.id}`}
-                      >
-                        <Copy className="w-4 h-4 mr-2" />
-                        Copy Link
-                      </Button>
-                    </div>
+
+                  <div className="divider"></div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyInviteLink(room.inviteCode);
+                      }}
+                      className="btn-outlined flex-1"
+                      data-testid={`button-copy-link-${room.id}`}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Link
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyInviteCode(room.inviteCode);
+                      }}
+                      className="btn-outlined flex-1"
+                      data-testid={`button-copy-code-${room.id}`}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Code
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

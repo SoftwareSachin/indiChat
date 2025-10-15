@@ -1,4 +1,5 @@
 export const SUPPORTED_LANGUAGES = [
+  { code: 'en', name: 'English', nativeName: 'English', locale: 'en-US' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', locale: 'hi-IN' },
   { code: 'bn', name: 'Bengali', nativeName: 'বাংলা', locale: 'bn-IN' },
   { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', locale: 'te-IN' },

@@ -28,50 +28,61 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   return (
     <div className={cn("flex gap-2 max-w-[85%] md:max-w-md", isSent ? "ml-auto" : "mr-auto")}>
-      <div className={cn("flex flex-col gap-1", isSent ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col gap-2", isSent ? "items-end" : "items-start")}>
         {!isSent && userName && (
-          <span className="text-xs font-medium text-muted-foreground px-3">{userName}</span>
+          <span className="label-small text-on-surface-variant px-3">{userName}</span>
         )}
         
         <div
           className={cn(
-            "rounded-2xl px-4 py-3 space-y-2",
+            "rounded-2xl px-4 py-3 space-y-3 elevation-1",
             isSent
-              ? "bg-primary text-primary-foreground rounded-br-md"
-              : "bg-card border border-card-border rounded-bl-md"
+              ? "bg-primary text-primary-foreground rounded-br-sm"
+              : "bg-surface-container-high text-on-surface rounded-bl-sm"
           )}
           data-testid={`message-bubble-${isSent ? 'sent' : 'received'}`}
         >
           {translatedFrom && (
-            <Badge variant="secondary" className="text-xs mb-1">
+            <Badge 
+              variant="secondary" 
+              className="label-small bg-surface-container text-on-surface-variant border-outline-variant"
+            >
               Translated from {translatedFrom}
             </Badge>
           )}
           
-          <p className="text-base leading-relaxed break-words">{content}</p>
+          <p className="body-large leading-relaxed break-words">{content}</p>
           
-          <div className="flex items-center gap-2 justify-between">
-            <span className="text-xs opacity-70 font-mono">{timestamp}</span>
+          <div className="flex items-center gap-3 justify-between">
+            <span className={cn(
+              "label-small",
+              isSent ? "text-primary-foreground/70" : "text-on-surface-variant"
+            )}>
+              {timestamp}
+            </span>
             
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {onPlayAudio && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
+                  className={cn(
+                    "h-7 w-7 icon-button",
+                    isSent ? "text-primary-foreground" : "text-on-surface"
+                  )}
                   onClick={onPlayAudio}
                   data-testid="button-play-audio"
                 >
-                  <Volume2 className="h-3 w-3" />
+                  <Volume2 className="h-4 w-4" />
                 </Button>
               )}
               
               {isSent && (
                 <span className="flex items-center">
-                  {status === 'sending' && <Clock className="h-3 w-3 opacity-70" />}
-                  {status === 'sent' && <Check className="h-3 w-3 opacity-70" />}
-                  {status === 'delivered' && <CheckCheck className="h-3 w-3 opacity-70" />}
-                  {status === 'failed' && <AlertCircle className="h-3 w-3 text-destructive" />}
+                  {status === 'sending' && <Clock className="h-4 w-4 opacity-70" />}
+                  {status === 'sent' && <Check className="h-4 w-4 opacity-70" />}
+                  {status === 'delivered' && <CheckCheck className="h-4 w-4 opacity-70" />}
+                  {status === 'failed' && <AlertCircle className="h-4 w-4 text-error" />}
                 </span>
               )}
             </div>

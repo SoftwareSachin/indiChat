@@ -11,9 +11,10 @@ import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
 import { useChat } from "@/hooks/useChat";
 import { type LanguageCode, getLanguageName } from "@/lib/languages";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Menu } from "lucide-react";
 import { AuthManager } from "@/lib/auth-manager";
 import { useToast } from "@/hooks/use-toast";
+import { AppSidebar } from "@/components/AppSidebar";
 
 export default function ChatPage() {
   const [, setLocation] = useLocation();
@@ -21,6 +22,7 @@ export default function ChatPage() {
   const roomId = params.roomId as string;
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [showSidebar, setShowSidebar] = useState(false);
   
   const token = localStorage.getItem("token");
   const userStr = localStorage.getItem("user");
@@ -31,7 +33,6 @@ export default function ChatPage() {
       return;
     }
 
-    // Listen for session changes from other tabs
     const authManager = AuthManager.getInstance();
     authManager.startListening(() => {
       toast({
@@ -68,7 +69,6 @@ export default function ChatPage() {
     playAudio,
     isRecording,
     isPaused,
-    interimTranscript,
     audioLevel,
   } = useChat(
     currentUser?.id || "",
@@ -112,77 +112,130 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="border-b bg-card">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/rooms")}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div className="flex-1">
-            <ChatHeader
-              connectionStatus={connectionStatus}
-              selectedLanguage={selectedLanguage}
-              onLanguageChange={handleLanguageChange}
-            />
+    <div className="flex h-screen bg-background">
+      {/* Sidebar for mobile */}
+      {showSidebar && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowSidebar(false)} />
+          <div className="absolute inset-y-0 left-0 w-64">
+            <AppSidebar />
           </div>
         </div>
+      )}
+
+      {/* Sidebar for desktop */}
+      <div className="hidden lg:block">
+        <AppSidebar />
       </div>
 
-      <div className="flex-1 overflow-hidden bg-background">
-        <ScrollArea className="h-full">
+      {/* Chat Container */}
+      <div className="flex-1 flex flex-col">
+        {/* Chat Header */}
+        <div className="elevation-1 border-b border-outline-variant">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setLocation("/rooms")}
+              className="icon-button lg:hidden"
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSidebar(true)}
+              className="icon-button lg:hidden"
+              data-testid="button-menu"
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+            <div className="flex-1">
+              <ChatHeader
+                connectionStatus={connectionStatus}
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={handleLanguageChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Messages Area */}
+        <ScrollArea className="flex-1 surface-container">
           <div ref={scrollRef} className="p-4 space-y-4">
-            {messages.map((message) => {
-              const isSent = message.userId === currentUser.id;
-              const translation = translatedMessages.get(message.id);
-              const displayContent = translation?.content || message.content;
-              const translatedFrom = translation ? getLanguageName(message.originalLanguage) : undefined;
-
-              return (
-                <MessageBubble
-                  key={message.id}
-                  content={displayContent}
-                  isSent={isSent}
-                  timestamp={new Date(message.timestamp).toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                  status="delivered"
-                  translatedFrom={translatedFrom}
-                  userName={isSent ? undefined : `User ${message.userId.slice(-4)}`}
-                  onPlayAudio={() => handlePlayAudio(message.id)}
-                />
-              );
-            })}
-
-            {isTranslating && <TranslationIndicator isTranslating={true} />}
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full min-h-[400px]">
+                <div className="text-center space-y-3">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                    <Menu className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="title-large text-on-surface">No messages yet</h3>
+                    <p className="body-medium text-on-surface-variant mt-2">
+                      Start a conversation in {getLanguageName(selectedLanguage)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              messages.map((message) => {
+                const translation = translatedMessages.get(message.id);
+                const isSent = message.userId === currentUser.id;
+                
+                return (
+                  <MessageBubble
+                    key={message.id}
+                    content={translation?.content || message.content}
+                    isSent={isSent}
+                    timestamp={new Date(message.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    translatedFrom={translation ? message.originalLanguage : undefined}
+                    originalContent={translation ? message.content : undefined}
+                    onPlayAudio={() => handlePlayAudio(message.id)}
+                  />
+                );
+              })
+            )}
             
-            {typingUsersList.map((username) => (
-              <TypingIndicator key={username} userName={username} />
-            ))}
+            {isTranslating && <TranslationIndicator isTranslating={isTranslating} />}
+            {typingUsersList.length > 0 && (
+              <TypingIndicator userName={typingUsersList[0]} />
+            )}
           </div>
         </ScrollArea>
-      </div>
 
-      <div className="px-4 pb-4">
-        <AudioRecorder
-          isRecording={isRecording}
-          isPaused={isPaused}
-          onStart={startVoiceInput}
-          onPause={pauseVoiceInput}
-          onResume={resumeVoiceInput}
-          onStop={stopVoiceInput}
-          onCancel={cancelVoiceInput}
-          interimTranscript={interimTranscript}
-          language={getLanguageName(selectedLanguage)}
-          audioLevel={audioLevel}
-        />
-      </div>
+        {/* Audio Recorder (when active) */}
+        {isRecording && (
+          <div className="elevation-2 border-t border-outline-variant p-4">
+            <AudioRecorder
+              isRecording={isRecording}
+              isPaused={isPaused}
+              onStart={startVoiceInput}
+              onPause={pauseVoiceInput}
+              onResume={resumeVoiceInput}
+              onStop={stopVoiceInput}
+              onCancel={cancelVoiceInput}
+              language={getLanguageName(selectedLanguage)}
+              audioLevel={audioLevel}
+            />
+          </div>
+        )}
 
-      <MessageInput
-        onSendMessage={handleSendMessage}
-        placeholder={`Type a message in ${getLanguageName(selectedLanguage)}...`}
-        onTyping={notifyTyping}
-      />
+        {/* Message Input */}
+        <div className="elevation-2 border-t border-outline-variant">
+          <MessageInput
+            onSendMessage={handleSendMessage}
+            onStartVoiceInput={startVoiceInput}
+            onStopVoiceInput={stopVoiceInput}
+            isRecording={isRecording}
+            placeholder={`Type a message in ${getLanguageName(selectedLanguage)}...`}
+            onTyping={notifyTyping}
+          />
+        </div>
+      </div>
     </div>
   );
 }

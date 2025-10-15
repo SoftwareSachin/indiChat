@@ -8,6 +8,8 @@ import AuthPage from "@/pages/AuthPage";
 import RoomsPage from "@/pages/RoomsPage";
 import ChatPage from "@/pages/ChatPage";
 import InvitePage from "@/pages/InvitePage";
+import ProfilePage from "@/pages/ProfilePage";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/rooms" component={RoomsPage} />
       <Route path="/chat/:roomId" component={ChatPage} />
       <Route path="/invite/:inviteCode" component={InvitePage} />
+      <Route path="/profile" component={ProfilePage} />
+      <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
