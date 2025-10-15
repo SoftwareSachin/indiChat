@@ -45,6 +45,12 @@ export function useChat(userId: string, username: string, language: LanguageCode
     const s = socket.current;
 
     const handleConnect = () => {
+      console.log("🔌 Socket connected, joining room:", {
+        userId: userIdRef.current,
+        username: usernameRef.current,
+        language: currentLanguageRef.current,
+        roomId: roomIdRef.current
+      });
       setConnectionStatus("connected");
       s.emit("room:join", { 
         userId: userIdRef.current, 
@@ -107,7 +113,9 @@ export function useChat(userId: string, username: string, language: LanguageCode
     s.on("user:stop-typing", handleUserStopTyping);
     s.on("audio:received", handleAudioReceived);
 
-    if (!s.connected) {
+    if (s.connected) {
+      handleConnect();
+    } else {
       setConnectionStatus("connecting");
       s.connect();
     }

@@ -35,10 +35,10 @@ export function MessageBubble({
         
         <div
           className={cn(
-            "rounded-2xl px-4 py-3 space-y-3 elevation-1",
+            "rounded-2xl px-4 py-3 space-y-3 shadow-sm",
             isSent
               ? "bg-primary text-primary-foreground rounded-br-sm"
-              : "bg-surface-container-high text-on-surface rounded-bl-sm"
+              : "bg-surface-container-high text-on-surface dark:bg-surface-container-high dark:text-on-surface rounded-bl-sm"
           )}
           data-testid={`message-bubble-${isSent ? 'sent' : 'received'}`}
         >
