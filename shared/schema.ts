@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   preferredLanguage: text("preferred_language").notNull().default('en'),
+  profileImage: text("profile_image"),
+  bio: text("bio"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -38,6 +40,18 @@ export const messages = pgTable("messages", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  roomId: varchar("room_id"),
+  messageId: varchar("message_id"),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -63,6 +77,22 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
   targetLanguage: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).pick({
+  userId: true,
+  type: true,
+  title: true,
+  message: true,
+  roomId: true,
+  messageId: true,
+});
+
+export const updateUserSchema = z.object({
+  username: z.string().min(1).optional(),
+  preferredLanguage: z.string().optional(),
+  profileImage: z.string().optional(),
+  bio: z.string().optional(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type LoginCredentials = z.infer<typeof loginSchema>;
@@ -71,3 +101,6 @@ export type ChatRoom = typeof chatRooms.$inferSelect;
 export type RoomMember = typeof roomMembers.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type UpdateUser = z.infer<typeof updateUserSchema>;

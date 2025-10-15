@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Message, type InsertMessage, type ChatRoom, type InsertRoom, type RoomMember, users, messages, chatRooms, roomMembers } from "@shared/schema";
+import { type User, type InsertUser, type Message, type InsertMessage, type ChatRoom, type InsertRoom, type RoomMember, type Notification, type InsertNotification, type UpdateUser, users, messages, chatRooms, roomMembers, notifications } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { hashPassword } from "./auth";
@@ -9,6 +9,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserLanguage(id: string, language: string): Promise<User | undefined>;
+  updateUser(id: string, data: UpdateUser): Promise<User | undefined>;
   
   // Message methods
   createMessage(message: InsertMessage): Promise<Message>;
@@ -25,6 +26,13 @@ export interface IStorage {
   addRoomMember(roomId: string, userId: string): Promise<RoomMember>;
   isRoomMember(roomId: string, userId: string): Promise<boolean>;
   getRoomMembers(roomId: string): Promise<RoomMember[]>;
+  
+  // Notification methods
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getNotificationsByUser(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
 }
 
 export class DbStorage implements IStorage {
@@ -51,6 +59,14 @@ export class DbStorage implements IStorage {
   async updateUserLanguage(id: string, language: string): Promise<User | undefined> {
     const [user] = await db.update(users)
       .set({ preferredLanguage: language })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, data: UpdateUser): Promise<User | undefined> {
+    const [user] = await db.update(users)
+      .set(data)
       .where(eq(users.id, id))
       .returning();
     return user;
@@ -147,6 +163,44 @@ export class DbStorage implements IStorage {
 
   async getRoomMembers(roomId: string): Promise<RoomMember[]> {
     return await db.select().from(roomMembers).where(eq(roomMembers.roomId, roomId));
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications).values({
+      userId: insertNotification.userId,
+      type: insertNotification.type,
+      title: insertNotification.title,
+      message: insertNotification.message,
+      roomId: insertNotification.roomId || null,
+      messageId: insertNotification.messageId || null,
+    }).returning();
+    return notification;
+  }
+
+  async getNotificationsByUser(userId: string): Promise<Notification[]> {
+    return await db.select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: string): Promise<void> {
+    await db.update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, id));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db.update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, userId));
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const result = await db.select()
+      .from(notifications)
+      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+    return result.length;
   }
 }
 
