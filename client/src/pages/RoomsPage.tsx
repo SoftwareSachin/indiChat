@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Copy, MessageSquare, Lock, Globe, Users, ArrowRight } from "lucide-react";
+import { Plus, Copy, Lock, Globe, Users, ArrowRight, Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AuthManager } from "@/lib/auth-manager";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -184,46 +184,45 @@ export default function RoomsPage() {
       <AppSidebar />
       
       <main className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto p-6 space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="headline-large text-on-background">Chat Rooms</h1>
-              <p className="body-large text-on-surface-variant mt-1">
+              <h1 className="text-3xl font-semibold text-on-background">Chat Rooms</h1>
+              <p className="text-sm text-on-surface-variant mt-1">
                 Join or create rooms to start chatting
               </p>
             </div>
             <div className="flex gap-3">
               <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="btn-outlined gap-2" data-testid="button-join-room">
-                    <Users className="w-5 h-5" />
+                  <Button variant="outline" className="gap-2" data-testid="button-join-room">
+                    <Users className="w-4 h-4" />
                     Join Room
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="title-large">Join a Room</DialogTitle>
-                    <DialogDescription className="body-medium">
+                    <DialogTitle className="text-xl font-semibold">Join a Room</DialogTitle>
+                    <DialogDescription className="text-sm">
                       Enter the invite code to join an existing room
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="invite-code" className="label-large">Invite Code</Label>
+                      <Label htmlFor="invite-code" className="text-sm font-medium">Invite Code</Label>
                       <Input
                         id="invite-code"
                         value={inviteCode}
                         onChange={(e) => setInviteCode(e.target.value)}
                         placeholder="Enter invite code"
-                        className="body-large"
+                        className="h-11"
                         data-testid="input-invite-code"
                       />
                     </div>
                     <Button
                       onClick={handleJoinRoom}
                       disabled={isLoading || !inviteCode.trim()}
-                      className="w-full btn-filled"
+                      className="w-full h-11"
                       data-testid="button-submit-join"
                     >
                       {isLoading ? "Joining..." : "Join Room"}
@@ -234,34 +233,34 @@ export default function RoomsPage() {
 
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="btn-filled gap-2" data-testid="button-create-room">
-                    <Plus className="w-5 h-5" />
+                  <Button className="gap-2" data-testid="button-create-room">
+                    <Plus className="w-4 h-4" />
                     Create Room
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="title-large">Create New Room</DialogTitle>
-                    <DialogDescription className="body-medium">
+                    <DialogTitle className="text-xl font-semibold">Create New Room</DialogTitle>
+                    <DialogDescription className="text-sm">
                       Create a new chat room and invite members
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="room-name" className="label-large">Room Name</Label>
+                      <Label htmlFor="room-name" className="text-sm font-medium">Room Name</Label>
                       <Input
                         id="room-name"
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                         placeholder="Enter room name"
-                        className="body-large"
+                        className="h-11"
                         data-testid="input-room-name"
                       />
                     </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container">
-                      <div className="space-y-1">
-                        <Label htmlFor="private-room" className="title-small">Private Room</Label>
-                        <p className="body-small text-on-surface-variant">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-surface-container dark:bg-surface-container-high border border-outline-variant">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="private-room" className="text-sm font-medium">Private Room</Label>
+                        <p className="text-xs text-on-surface-variant">
                           Only invited users can join
                         </p>
                       </div>
@@ -275,7 +274,7 @@ export default function RoomsPage() {
                     <Button
                       onClick={handleCreateRoom}
                       disabled={isLoading || !roomName.trim()}
-                      className="w-full btn-filled"
+                      className="w-full h-11"
                       data-testid="button-submit-create"
                     >
                       {isLoading ? "Creating..." : "Create Room"}
@@ -286,17 +285,40 @@ export default function RoomsPage() {
             </div>
           </div>
 
-          {/* Rooms Grid */}
           {rooms.length === 0 ? (
-            <div className="surface-container rounded-2xl p-12 text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                <MessageSquare className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="title-large text-on-surface">No rooms yet</h3>
-                <p className="body-medium text-on-surface-variant mt-2">
-                  Create your first room or join an existing one to get started
-                </p>
+            <div className="flex items-center justify-center min-h-[500px]">
+              <div className="text-center space-y-6 max-w-md">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                  <svg 
+                    className="w-10 h-10 text-primary" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-on-surface">No rooms yet</h3>
+                  <p className="text-sm text-on-surface-variant mt-2">
+                    Create your first room or join an existing one to get started
+                  </p>
+                </div>
+                <div className="flex gap-3 justify-center">
+                  <Button variant="outline" onClick={() => setIsJoinDialogOpen(true)} className="gap-2">
+                    <Users className="w-4 h-4" />
+                    Join Room
+                  </Button>
+                  <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Create Room
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
@@ -304,25 +326,37 @@ export default function RoomsPage() {
               {rooms.map((room) => (
                 <div
                   key={room.id}
-                  className="card-outlined p-6 space-y-4 hover:shadow-md transition-shadow cursor-pointer group"
+                  className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-5 space-y-4 hover:shadow-md dark:hover:shadow-lg transition-all cursor-pointer group"
                   onClick={() => setLocation(`/chat/${room.id}`)}
                   data-testid={`room-card-${room.id}`}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <MessageSquare className="w-6 h-6 text-primary" />
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center shrink-0">
+                        <svg 
+                          className="w-6 h-6 text-primary" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+                          />
+                        </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="title-medium text-on-surface truncate">{room.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
+                        <h3 className="text-base font-semibold text-on-surface truncate">{room.name}</h3>
+                        <div className="flex items-center gap-2 mt-1.5">
                           {room.isPrivate ? (
-                            <Badge variant="secondary" className="gap-1">
+                            <Badge variant="secondary" className="gap-1 text-xs h-5 px-2">
                               <Lock className="w-3 h-3" />
                               Private
                             </Badge>
                           ) : (
-                            <Badge variant="secondary" className="gap-1">
+                            <Badge variant="secondary" className="gap-1 text-xs h-5 px-2">
                               <Globe className="w-3 h-3" />
                               Public
                             </Badge>
@@ -330,10 +364,10 @@ export default function RoomsPage() {
                         </div>
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="w-5 h-5 text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                   </div>
 
-                  <div className="divider"></div>
+                  <div className="h-px bg-outline-variant"></div>
 
                   <div className="flex gap-2">
                     <Button
@@ -343,10 +377,10 @@ export default function RoomsPage() {
                         e.stopPropagation();
                         copyInviteLink(room.inviteCode);
                       }}
-                      className="btn-outlined flex-1"
+                      className="flex-1 h-9 text-xs"
                       data-testid={`button-copy-link-${room.id}`}
                     >
-                      <Copy className="w-4 h-4 mr-2" />
+                      <Link2 className="w-3.5 h-3.5 mr-1.5" />
                       Copy Link
                     </Button>
                     <Button
@@ -356,10 +390,10 @@ export default function RoomsPage() {
                         e.stopPropagation();
                         copyInviteCode(room.inviteCode);
                       }}
-                      className="btn-outlined flex-1"
+                      className="flex-1 h-9 text-xs"
                       data-testid={`button-copy-code-${room.id}`}
                     >
-                      <Copy className="w-4 h-4 mr-2" />
+                      <Copy className="w-3.5 h-3.5 mr-1.5" />
                       Copy Code
                     </Button>
                   </div>
