@@ -32,7 +32,7 @@ interface ChatState {
 export const useChatStore = create<ChatState>((set) => ({
   user: null,
   messages: [],
-  connectionStatus: 'disconnected',
+  connectionStatus: 'connecting',
   isTyping: false,
   typingUsers: new Map(),
   translatedMessages: new Map(),
