@@ -1,6 +1,12 @@
+import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Set NODE_ENV explicitly for Windows compatibility
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development';
+}
 
 const app = express();
 app.use(express.json());
@@ -50,9 +56,14 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("Checking if development mode...");
+
+  if (process.env.NODE_ENV === "development" || !process.env.NODE_ENV) {
+    console.log("Using Vite development server");
     await setupVite(app, server);
   } else {
+    console.log("Using production static files");
     serveStatic(app);
   }
 
@@ -63,8 +74,8 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: "127.0.0.1", // Use localhost instead of 0.0.0.0 for Windows compatibility
+    // reusePort: true, // Remove for Windows compatibility
   }, () => {
     log(`serving on port ${port}`);
   });

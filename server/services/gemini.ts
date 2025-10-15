@@ -173,58 +173,8 @@ export async function detectLanguage(text: string): Promise<string> {
   }
 }
 
-// Speech-to-text using Gemini (audio transcription)
-export async function transcribeSpeech(audioData: Buffer, languageCode: string, mimeType: string = 'audio/webm'): Promise<string> {
-  try {
-    const languageNames: Record<string, string> = {
-      hi: "Hindi",
-      bn: "Bengali",
-      te: "Telugu",
-      mr: "Marathi",
-      ta: "Tamil",
-      gu: "Gujarati",
-      ur: "Urdu",
-      kn: "Kannada",
-      or: "Odia",
-      ml: "Malayalam",
-      pa: "Punjabi",
-      as: "Assamese",
-    };
-
-    const language = languageNames[languageCode] || "Hindi";
-    
-    console.log(`🎤 GEMINI AUDIO TRANSCRIPTION: ${language}, mime: ${mimeType}`);
-
-    const prompt = `Transcribe this audio in ${language}. Provide only the transcribed text, no explanations.`;
-
-    const response = await retryWithRotation(async (ai) => {
-      return await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  data: audioData.toString('base64'),
-                  mimeType: mimeType,
-                }
-              }
-            ]
-          }
-        ],
-      });
-    });
-
-    const transcribedText = response.text?.trim() || "";
-    console.log(`✅ GEMINI TRANSCRIPTION: "${transcribedText.substring(0, 50)}..."`);
-    
-    return transcribedText;
-  } catch (error) {
-    console.error("❌ GEMINI TRANSCRIPTION ERROR:", error);
-    throw new Error(`Failed to transcribe speech: ${error}`);
-  }
-}
+// Speech-to-text functionality removed - now using OpenAI Whisper API
+// This file now only handles text translation and text-to-speech
 
 // Helper function to clean and validate text for TTS
 function cleanTextForTTS(text: string): string {

@@ -2,22 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/store/chatStore";
 import { getSocket } from "@/lib/socket";
 import { type Message } from "@shared/schema";
-import { SpeechRecognitionService, TextToSpeechService } from "@/lib/speech";
 import { AudioRecorderService, AudioPlayerService } from "@/lib/audioRecorder";
+import { FallbackSpeechRecognition, isFallbackSTTAvailable } from "@/lib/fallback-speech";
 import { type LanguageCode } from "@/lib/languages";
 
 export function useChat(userId: string, username: string, language: LanguageCode, roomId: string) {
   const socket = useRef(getSocket());
-  const speechRecognition = useRef<SpeechRecognitionService | null>(null);
-  const textToSpeech = useRef(new TextToSpeechService());
   const audioRecorder = useRef(new AudioRecorderService());
   const audioPlayer = useRef(new AudioPlayerService());
+  const fallbackSTT = useRef<FallbackSpeechRecognition | null>(null);
   const typingTimeout = useRef<NodeJS.Timeout>();
   const currentLanguageRef = useRef(language);
   const userIdRef = useRef(userId);
   const usernameRef = useRef(username);
   const roomIdRef = useRef(roomId);
-  const [useGeminiAudio, setUseGeminiAudio] = useState(true);
   
   const {
     setConnectionStatus,
@@ -31,8 +29,8 @@ export function useChat(userId: string, username: string, language: LanguageCode
 
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [interimTranscript, setInterimTranscript] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
+  const [useFallbackSTT, setUseFallbackSTT] = useState(false);
 
   // Keep refs updated with latest values
   useEffect(() => {
@@ -90,6 +88,16 @@ export function useChat(userId: string, username: string, language: LanguageCode
       }
     };
 
+    const handleWhisperUnavailable = () => {
+      console.log("🔄 Whisper API unavailable, checking for fallback STT...");
+      if (isFallbackSTTAvailable()) {
+        setUseFallbackSTT(true);
+        console.log("✅ Browser STT available as fallback");
+      } else {
+        console.log("❌ No STT options available");
+      }
+    };
+
     s.on("connect", handleConnect);
     s.on("disconnect", handleDisconnect);
     s.on("messages:history", handleMessagesHistory);
@@ -123,13 +131,6 @@ export function useChat(userId: string, username: string, language: LanguageCode
   // Update user info and notify server when language changes
   useEffect(() => {
     setUser({ id: userId, username, language });
-    
-    // Initialize speech recognition with current language
-    try {
-      speechRecognition.current = new SpeechRecognitionService(language);
-    } catch (error) {
-      console.error("Speech recognition not available:", error);
-    }
 
     // Notify server of language change if connected
     if (socket.current.connected) {
@@ -177,124 +178,75 @@ export function useChat(userId: string, username: string, language: LanguageCode
   }, [isRecording, isPaused]);
 
   const startVoiceInput = async () => {
-    if (useGeminiAudio) {
-      // Use Gemini-powered audio recording
-      try {
-        console.log(`🎤 GEMINI AUDIO RECORDING STARTED: Language ${language}`);
-        await audioRecorder.current.startRecording();
-        setIsRecording(true);
-      } catch (error) {
-        console.error("❌ Failed to start audio recording:", error);
-        setIsRecording(false);
-      }
-    } else {
-      // Use browser's native speech recognition
-      if (!speechRecognition.current) {
-        console.error("Speech recognition not available");
-        return;
-      }
-
-      console.log(`🎤 VOICE INPUT STARTED: Language ${language}`);
-      speechRecognition.current.setLanguage(language);
-      speechRecognition.current.start(
-        (text, isFinal) => {
-          if (isFinal) {
-            console.log(`✅ VOICE TRANSCRIBED: "${text}" in ${language}`);
-            console.log(`📤 SENDING to server for Gemini translation...`);
-            sendMessage(text);
-            setInterimTranscript("");
-            setIsRecording(false);
-          } else {
-            setInterimTranscript(text);
-          }
-        },
-        (error) => {
-          console.error("❌ Speech recognition error:", error);
-          setIsRecording(false);
-        }
-      );
-      
+    // Use Whisper-powered audio recording (server-side transcription)
+    try {
+      console.log(`🎤 WHISPER AUDIO RECORDING STARTED: Language ${language}`);
+      await audioRecorder.current.startRecording();
       setIsRecording(true);
+    } catch (error) {
+      console.error("❌ Failed to start audio recording:", error);
+      setIsRecording(false);
     }
   };
 
   const pauseVoiceInput = () => {
-    if (useGeminiAudio) {
-      audioRecorder.current.pauseRecording();
-      setIsPaused(true);
-      console.log('⏸️ Voice input paused');
-    }
+    audioRecorder.current.pauseRecording();
+    setIsPaused(true);
+    console.log('⏸️ Voice input paused');
   };
 
   const resumeVoiceInput = () => {
-    if (useGeminiAudio) {
-      audioRecorder.current.resumeRecording();
-      setIsPaused(false);
-      console.log('▶️ Voice input resumed');
-    }
+    audioRecorder.current.resumeRecording();
+    setIsPaused(false);
+    console.log('▶️ Voice input resumed');
   };
 
   const stopVoiceInput = async () => {
-    if (useGeminiAudio) {
-      // Stop Gemini audio recording and send to server
-      try {
-        const { audioBlob, mimeType } = await audioRecorder.current.stopRecording();
-        console.log(`🛑 GEMINI AUDIO RECORDING STOPPED: ${audioBlob.size} bytes`);
-        
-        // Convert blob to base64
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64Audio = reader.result?.toString().split(',')[1];
-          if (base64Audio) {
-            console.log(`📤 SENDING AUDIO to Gemini for transcription and translation...`);
-            socket.current.emit("audio:send", {
-              userId,
-              roomId,
-              audioData: base64Audio,
-              originalLanguage: language,
-              mimeType,
-            });
-          }
-        };
-        reader.readAsDataURL(audioBlob);
-        
-        setIsRecording(false);
-        setIsPaused(false);
-      } catch (error) {
-        console.error("❌ Failed to stop audio recording:", error);
-        setIsRecording(false);
-        setIsPaused(false);
-      }
-    } else {
-      // Stop browser's native speech recognition
-      speechRecognition.current?.stop();
+    // Stop Whisper audio recording and send to server
+    try {
+      const { audioBlob, mimeType } = await audioRecorder.current.stopRecording();
+      console.log(`🛑 WHISPER AUDIO RECORDING STOPPED: ${audioBlob.size} bytes`);
+      
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Audio = reader.result?.toString().split(',')[1];
+        if (base64Audio) {
+          console.log(`📤 SENDING AUDIO to Whisper for transcription and translation...`);
+          socket.current.emit("audio:send", {
+            userId,
+            roomId,
+            audioData: base64Audio,
+            originalLanguage: language,
+            mimeType,
+          });
+        }
+      };
+      reader.readAsDataURL(audioBlob);
+      
       setIsRecording(false);
       setIsPaused(false);
-      setInterimTranscript("");
+    } catch (error) {
+      console.error("❌ Failed to stop audio recording:", error);
+      setIsRecording(false);
+      setIsPaused(false);
     }
   };
 
   const cancelVoiceInput = () => {
-    if (useGeminiAudio) {
-      audioRecorder.current.cancelRecording();
-      setIsRecording(false);
-      setIsPaused(false);
-      console.log('❌ Voice input cancelled');
-    } else {
-      speechRecognition.current?.stop();
-      setIsRecording(false);
-      setIsPaused(false);
-      setInterimTranscript("");
-    }
+    audioRecorder.current.cancelRecording();
+    setIsRecording(false);
+    setIsPaused(false);
+    console.log('❌ Voice input cancelled');
   };
 
   const playAudio = (text: string, languageCode: string) => {
     console.log(`🔊 PLAYING AUDIO: "${text.substring(0, 50)}..." in ${languageCode}`);
-    textToSpeech.current.speak(text, languageCode);
+    // Audio playback functionality removed - server handles TTS now
   };
 
   const stopAudio = () => {
-    textToSpeech.current.stop();
+    // Audio stop functionality removed - server handles TTS now
   };
 
   return {
@@ -309,7 +261,6 @@ export function useChat(userId: string, username: string, language: LanguageCode
     stopAudio,
     isRecording,
     isPaused,
-    interimTranscript,
     audioLevel,
   };
 }

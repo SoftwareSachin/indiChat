@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { Server as SocketServer } from "socket.io";
 import { storage } from "./storage";
-import { translateText, detectLanguage, transcribeSpeech, generateSpeech } from "./services/gemini";
+import { translateText, detectLanguage, generateSpeech } from "./services/gemini";
+import { transcribeSpeech } from "./services/whisper";
 import { insertMessageSchema, insertUserSchema, loginSchema, insertRoomSchema } from "@shared/schema";
 import { generateToken, comparePassword, authMiddleware } from "./auth";
 import crypto from "crypto";
@@ -307,9 +308,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`🎤 Received audio message from ${data.userId} in ${data.originalLanguage}`);
 
-        // Transcribe audio using Gemini
+        // Transcribe audio using Whisper
         const audioBuffer = Buffer.from(data.audioData, 'base64');
-        const transcribedText = await transcribeSpeech(audioBuffer, data.originalLanguage, data.mimeType);
+        let transcribedText;
+        
+        try {
+          transcribedText = await transcribeSpeech(audioBuffer, data.originalLanguage, data.mimeType);
+        } catch (error) {
+          console.error("Whisper transcription failed, using fallback message:", error);
+          // Fallback message when Whisper fails
+          transcribedText = `[Audio message in ${data.originalLanguage} - Transcription temporarily unavailable due to network issues. Please check your connection or try again later.]`;
+        }
 
         // Save the transcribed message
         const message = await storage.createMessage({
