@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { 
-  MessageSquare, 
   Settings, 
   LogOut, 
   User, 
-  Globe, 
   Bell,
   ChevronLeft,
   ChevronRight,
@@ -44,14 +42,12 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
   const user = userStr ? JSON.parse(userStr) : null;
   const token = localStorage.getItem("token");
 
-  // Identify user to socket for notifications
   useEffect(() => {
     if (user?.id) {
       socket.emit("user:identify", { userId: user.id });
     }
   }, [user?.id]);
 
-  // Fetch notification count
   const fetchNotificationCount = async () => {
     if (!token) return;
     
@@ -72,12 +68,10 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
     }
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchNotificationCount();
   }, [token]);
 
-  // Refetch count when page becomes visible or focused
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
@@ -98,7 +92,6 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
     };
   }, [token]);
 
-  // Listen for real-time notification updates
   useEffect(() => {
     const handleNewNotification = () => {
       setNotificationCount(prev => prev + 1);
@@ -138,20 +131,24 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
 
   const navItems = [
     {
-      icon: MessageSquare,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
       label: "Rooms",
       href: "/rooms",
       active: location === "/rooms",
     },
     {
-      icon: Bell,
+      icon: <Bell className="w-5 h-5" />,
       label: "Notifications",
       href: "/notifications",
       active: location === "/notifications",
       badge: notificationCount > 0 ? notificationCount : undefined,
     },
     {
-      icon: Settings,
+      icon: <Settings className="w-5 h-5" />,
       label: "Settings",
       href: "/settings",
       active: location === "/settings",
@@ -172,26 +169,37 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-screen bg-surface-container border-r border-outline-variant transition-all duration-300",
+        "flex flex-col h-screen bg-surface dark:bg-surface border-r border-outline-variant transition-all duration-300",
         isCollapsed ? "w-20" : "w-64"
       )}
       data-testid="app-sidebar"
     >
-      {/* Sidebar Header */}
       <div className="flex items-center justify-between p-4 border-b border-outline-variant">
         {!isCollapsed && (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-primary-foreground" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+              <svg 
+                className="w-5 h-5 text-primary" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+                />
+              </svg>
             </div>
-            <span className="title-large text-on-surface">Xchat</span>
+            <span className="text-lg font-semibold text-on-surface">XChat</span>
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleCollapse}
-          className="icon-button"
+          className="h-9 w-9"
           data-testid="button-toggle-sidebar"
         >
           {isCollapsed ? (
@@ -202,30 +210,29 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
         </Button>
       </div>
 
-      {/* Profile Section */}
-      <div className="p-4 border-b border-outline-variant">
+      <div className="p-3 border-b border-outline-variant">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container-highest transition-colors",
+                "w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors",
                 isCollapsed && "justify-center"
               )}
               data-testid="button-profile-menu"
             >
-              <Avatar className="w-10 h-10">
+              <Avatar className="w-9 h-9 shrink-0">
                 {user.profileImage ? (
                   <AvatarImage src={user.profileImage} alt={user.username} />
                 ) : (
-                  <AvatarFallback className="bg-primary text-primary-foreground title-medium">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
                     {getInitials(user.username)}
                   </AvatarFallback>
                 )}
               </Avatar>
               {!isCollapsed && (
-                <div className="flex-1 text-left">
-                  <p className="title-small text-on-surface">{user.username}</p>
-                  <p className="label-small text-on-surface-variant">
+                <div className="flex-1 text-left min-w-0">
+                  <p className="text-sm font-medium text-on-surface truncate">{user.username}</p>
+                  <p className="text-xs text-on-surface-variant">
                     {user.preferredLanguage?.toUpperCase() || "EN"}
                   </p>
                 </div>
@@ -265,36 +272,34 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
         </DropdownMenu>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const Icon = item.icon;
           return (
             <button
               key={item.href}
               onClick={() => item.href !== "#" && setLocation(item.href)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors relative",
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative text-sm font-medium",
                 item.active
-                  ? "bg-secondary-container text-on-secondary-container"
-                  : "text-on-surface-variant hover:bg-surface-container-highest",
+                  ? "bg-primary/10 dark:bg-primary/20 text-primary"
+                  : "text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high",
                 isCollapsed && "justify-center"
               )}
               data-testid={`nav-${item.label.toLowerCase()}`}
             >
-              <Icon className="w-5 h-5" />
+              {item.icon}
               {!isCollapsed && (
-                <span className="label-large flex-1 text-left">
+                <span className="flex-1 text-left">
                   {item.label}
                 </span>
               )}
               {!isCollapsed && item.badge && (
-                <span className="bg-error text-on-error rounded-full w-6 h-6 flex items-center justify-center label-small">
+                <span className="bg-error text-on-error rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center text-xs font-medium">
                   {item.badge}
                 </span>
               )}
               {isCollapsed && item.badge && (
-                <span className="absolute -top-1 -right-1 bg-error text-on-error rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                <span className="absolute -top-1 -right-1 bg-error text-on-error rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-medium">
                   {item.badge}
                 </span>
               )}
@@ -303,12 +308,11 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-outline-variant">
+      <div className="p-2 border-t border-outline-variant">
         <button
           onClick={toggleTheme}
           className={cn(
-            "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-highest transition-colors",
+            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-colors text-sm font-medium",
             isCollapsed && "justify-center"
           )}
           data-testid="button-theme-toggle"
@@ -319,7 +323,7 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
             <Moon className="w-5 h-5" />
           )}
           {!isCollapsed && (
-            <span className="label-large">
+            <span>
               {theme === "dark" ? "Light Mode" : "Dark Mode"}
             </span>
           )}

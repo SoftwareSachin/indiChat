@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, User, Globe, Save, Camera, Edit2 } from "lucide-react";
+import { ArrowLeft, User, Globe, Save, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +36,6 @@ export default function ProfilePage() {
   const [profileImage, setProfileImage] = useState(user?.profileImage || "");
 
   useEffect(() => {
-    // Fetch fresh profile data
     const fetchProfile = async () => {
       try {
         const response = await fetch("/api/user/profile", {
@@ -71,7 +70,6 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "Error",
@@ -81,7 +79,6 @@ export default function ProfilePage() {
       return;
     }
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Error",
@@ -111,7 +108,6 @@ export default function ProfilePage() {
       const data = await response.json();
       setProfileImage(data.profileImage);
       
-      // Update user in localStorage
       const updatedUser = { ...user, profileImage: data.profileImage };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
@@ -179,40 +175,35 @@ export default function ProfilePage() {
       
       <main className="flex-1 overflow-auto">
         <div className="max-w-4xl mx-auto p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLocation("/rooms")}
-              className="icon-button"
+              className="h-9 w-9"
               data-testid="button-back"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-on-background">Profile Settings</h1>
-              <p className="text-on-surface-variant mt-1">
+              <h1 className="text-2xl font-semibold text-on-background">Profile Settings</h1>
+              <p className="text-sm text-on-surface-variant mt-0.5">
                 Manage your account information and preferences
               </p>
             </div>
           </div>
 
-          {/* Profile Header Card with Cover */}
-          <div className="relative card-outlined overflow-hidden">
-            {/* Cover Image */}
-            <div className="h-32 bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20"></div>
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl overflow-hidden">
+            <div className="h-28 bg-primary/5 dark:bg-primary/10"></div>
             
-            {/* Profile Info */}
             <div className="px-6 pb-6">
-              {/* Avatar - positioned to overlap cover */}
-              <div className="relative -mt-16 mb-4">
+              <div className="relative -mt-14 mb-4">
                 <div className="relative inline-block">
-                  <Avatar className="w-32 h-32 border-4 border-background">
+                  <Avatar className="w-28 h-28 border-4 border-background dark:border-background">
                     {profileImage ? (
                       <AvatarImage src={profileImage} alt={username} />
                     ) : (
-                      <AvatarFallback className="bg-primary text-primary-foreground text-3xl">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                         {getInitials(username)}
                       </AvatarFallback>
                     )}
@@ -220,12 +211,12 @@ export default function ProfilePage() {
                   <Button
                     size="icon"
                     variant="secondary"
-                    className="absolute bottom-0 right-0 rounded-full w-10 h-10 shadow-lg"
+                    className="absolute bottom-0 right-0 rounded-full w-9 h-9 shadow-sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploadingImage}
                     data-testid="button-change-photo"
                   >
-                    <Camera className="w-5 h-5" />
+                    <Camera className="w-4 h-4" />
                   </Button>
                   <input
                     ref={fileInputRef}
@@ -238,14 +229,13 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* User Info */}
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-on-surface">{username}</h2>
-                <p className="text-on-surface-variant">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold text-on-surface">{username}</h2>
+                <p className="text-sm text-on-surface-variant">
                   {SUPPORTED_LANGUAGES.find(l => l.code === preferredLanguage)?.nativeName} Speaker
                 </p>
                 {bio && (
-                  <p className="text-on-surface-variant mt-2 max-w-2xl">
+                  <p className="text-sm text-on-surface-variant mt-2 max-w-2xl">
                     {bio}
                   </p>
                 )}
@@ -253,18 +243,12 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Edit Profile Form */}
-          <div className="card-outlined p-6 space-y-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Edit2 className="w-5 h-5 text-primary" />
-              <h3 className="text-xl font-semibold text-on-surface">Edit Profile</h3>
-            </div>
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-6 space-y-6">
+            <h3 className="text-lg font-semibold text-on-surface">Edit Profile</h3>
 
-            <div className="space-y-6">
-              {/* Username */}
+            <div className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="username" className="text-sm font-medium text-on-surface">
-                  <User className="w-4 h-4 inline mr-2" />
                   Username
                 </Label>
                 <Input
@@ -272,12 +256,11 @@ export default function ProfilePage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
-                  className="text-base"
+                  className="h-11"
                   data-testid="input-username"
                 />
               </div>
 
-              {/* Bio */}
               <div className="space-y-2">
                 <Label htmlFor="bio" className="text-sm font-medium text-on-surface">
                   About
@@ -287,7 +270,7 @@ export default function ProfilePage() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Tell us about yourself..."
-                  className="min-h-[100px] text-base resize-none"
+                  className="min-h-[100px] resize-none"
                   maxLength={200}
                   data-testid="textarea-bio"
                 />
@@ -296,14 +279,12 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Language */}
               <div className="space-y-2">
                 <Label htmlFor="language" className="text-sm font-medium text-on-surface">
-                  <Globe className="w-4 h-4 inline mr-2" />
                   Preferred Language
                 </Label>
                 <Select value={preferredLanguage} onValueChange={(value) => setPreferredLanguage(value as LanguageCode)}>
-                  <SelectTrigger id="language" className="text-base" data-testid="select-language">
+                  <SelectTrigger id="language" className="h-11" data-testid="select-language">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -314,14 +295,13 @@ export default function ProfilePage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-sm text-on-surface-variant">
+                <p className="text-xs text-on-surface-variant">
                   Messages will be automatically translated to this language
                 </p>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant">
               <Button
                 variant="outline"
                 onClick={() => setLocation("/rooms")}
@@ -341,19 +321,18 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Account Information Card */}
-          <div className="card-filled p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-on-surface">Account Information</h3>
+          <div className="bg-surface-container dark:bg-surface-container-high rounded-2xl p-6 space-y-4">
+            <h3 className="text-base font-semibold text-on-surface">Account Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <p className="text-xs font-medium text-on-surface-variant">User ID</p>
-                <p className="text-sm text-on-surface font-mono bg-surface-container px-3 py-2 rounded">
+                <p className="text-sm text-on-surface font-mono bg-background dark:bg-surface px-3 py-2 rounded-lg border border-outline-variant">
                   {user.id}
                 </p>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <p className="text-xs font-medium text-on-surface-variant">Member Since</p>
-                <p className="text-sm text-on-surface bg-surface-container px-3 py-2 rounded">
+                <p className="text-sm text-on-surface bg-background dark:bg-surface px-3 py-2 rounded-lg border border-outline-variant">
                   {new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',

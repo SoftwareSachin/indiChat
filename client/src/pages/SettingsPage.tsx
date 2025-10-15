@@ -27,41 +27,38 @@ export default function SettingsPage() {
       
       <main className="flex-1 overflow-auto">
         <div className="max-w-4xl mx-auto p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLocation("/rooms")}
-              className="icon-button"
+              className="h-9 w-9"
               data-testid="button-back"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="headline-medium text-on-background">Settings</h1>
-              <p className="body-medium text-on-surface-variant">
+              <h1 className="text-2xl font-semibold text-on-background">Settings</h1>
+              <p className="text-sm text-on-surface-variant mt-0.5">
                 Customize your chat experience
               </p>
             </div>
           </div>
 
-          {/* Appearance Settings */}
-          <div className="card-outlined p-6 space-y-4">
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-6 space-y-5">
             <div className="flex items-center gap-3">
               {theme === "dark" ? (
                 <Moon className="w-5 h-5 text-primary" />
               ) : (
                 <Sun className="w-5 h-5 text-primary" />
               )}
-              <h2 className="title-large text-on-surface">Appearance</h2>
+              <h2 className="text-lg font-semibold text-on-surface">Appearance</h2>
             </div>
-            <div className="divider"></div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between py-3">
               <div className="space-y-1">
-                <Label className="title-small text-on-surface">Dark Mode</Label>
-                <p className="body-small text-on-surface-variant">
+                <Label className="text-sm font-medium text-on-surface">Dark Mode</Label>
+                <p className="text-xs text-on-surface-variant">
                   Switch between light and dark theme
                 </p>
               </div>
@@ -73,18 +70,16 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Translation Settings */}
-          <div className="card-outlined p-6 space-y-4">
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-6 space-y-5">
             <div className="flex items-center gap-3">
               <Globe className="w-5 h-5 text-primary" />
-              <h2 className="title-large text-on-surface">Translation</h2>
+              <h2 className="text-lg font-semibold text-on-surface">Translation</h2>
             </div>
-            <div className="divider"></div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between py-3">
               <div className="space-y-1">
-                <Label className="title-small text-on-surface">Auto-Translate Messages</Label>
-                <p className="body-small text-on-surface-variant">
+                <Label className="text-sm font-medium text-on-surface">Auto-Translate Messages</Label>
+                <p className="text-xs text-on-surface-variant">
                   Automatically translate incoming messages to your preferred language
                 </p>
               </div>
@@ -96,18 +91,16 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Notifications Settings */}
-          <div className="card-outlined p-6 space-y-4">
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-6 space-y-5">
             <div className="flex items-center gap-3">
               <Bell className="w-5 h-5 text-primary" />
-              <h2 className="title-large text-on-surface">Notifications</h2>
+              <h2 className="text-lg font-semibold text-on-surface">Notifications</h2>
             </div>
-            <div className="divider"></div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between py-3 border-b border-outline-variant">
               <div className="space-y-1">
-                <Label className="title-small text-on-surface">Enable Notifications</Label>
-                <p className="body-small text-on-surface-variant">
+                <Label className="text-sm font-medium text-on-surface">Enable Notifications</Label>
+                <p className="text-xs text-on-surface-variant">
                   Receive notifications for new messages
                 </p>
               </div>
@@ -118,12 +111,10 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="divider"></div>
-
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between py-3">
               <div className="space-y-1">
-                <Label className="title-small text-on-surface">Sound Notifications</Label>
-                <p className="body-small text-on-surface-variant">
+                <Label className="text-sm font-medium text-on-surface">Sound Notifications</Label>
+                <p className="text-xs text-on-surface-variant">
                   Play sound when receiving messages
                 </p>
               </div>
@@ -135,22 +126,20 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Privacy & Security */}
-          <div className="card-outlined p-6 space-y-4">
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-6 space-y-5">
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-primary" />
-              <h2 className="title-large text-on-surface">Privacy & Security</h2>
+              <h2 className="text-lg font-semibold text-on-surface">Privacy & Security</h2>
             </div>
-            <div className="divider"></div>
             
-            <div className="space-y-3">
-              <p className="body-medium text-on-surface-variant">
+            <div className="space-y-4">
+              <p className="text-sm text-on-surface-variant leading-relaxed">
                 Your messages are translated using AI and transmitted securely. 
                 We do not store your message content permanently.
               </p>
               <Button 
                 variant="outline" 
-                className="btn-outlined"
+                className="w-full sm:w-auto"
                 data-testid="button-privacy-policy"
               >
                 View Privacy Policy
