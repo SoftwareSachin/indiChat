@@ -365,8 +365,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         io.to(data.roomId).emit("message:new", message);
 
+        // Get sender info
+        const sender = await storage.getUser(data.userId);
+        const room = await storage.getRoom(data.roomId);
+        const roomMembers = await storage.getRoomMembers(data.roomId);
+
         const roomUsers = Array.from(connectedUsers.entries())
           .filter(([_, user]) => user.roomId === data.roomId);
+        
+        // Create notifications for all room members except the sender
+        for (const member of roomMembers) {
+          if (member.userId !== data.userId) {
+            const notification = await storage.createNotification({
+              userId: member.userId,
+              type: 'message',
+              title: `New message in ${room?.name || 'room'}`,
+              message: `${sender?.username || 'Someone'}: ${data.content.substring(0, 50)}${data.content.length > 50 ? '...' : ''}`,
+              roomId: data.roomId,
+              messageId: message.id,
+            });
+
+            // Find the socket ID for this user
+            const userSocket = roomUsers.find(([_, user]) => user.id === member.userId);
+            if (userSocket) {
+              io.to(userSocket[0]).emit("notification:new", notification);
+            }
+          }
+        }
         
         for (const [clientId, user] of roomUsers) {
           if (user.language !== data.originalLanguage) {
