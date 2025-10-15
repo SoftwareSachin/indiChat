@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
 import { useChat } from "@/hooks/useChat";
 import { type LanguageCode, getLanguageName } from "@/lib/languages";
-import { ArrowLeft, Menu } from "lucide-react";
+import { ArrowLeft, Menu, MessageSquare } from "lucide-react";
 import { AuthManager } from "@/lib/auth-manager";
 import { useToast } from "@/hooks/use-toast";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -131,8 +131,8 @@ export default function ChatPage() {
       {/* Chat Container */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="elevation-1 border-b border-outline-variant">
-          <div className="flex items-center gap-3 px-4 py-3">
+        <div className="bg-surface border-b border-outline-variant">
+          <div className="flex items-center gap-2 px-3 py-4">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -162,17 +162,17 @@ export default function ChatPage() {
         </div>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 surface-container">
-          <div ref={scrollRef} className="p-4 space-y-4">
+        <ScrollArea className="flex-1 bg-surface-container-low">
+          <div ref={scrollRef} className="p-6 space-y-6 max-w-5xl mx-auto">
             {messages.length === 0 ? (
-              <div className="flex items-center justify-center h-full min-h-[400px]">
-                <div className="text-center space-y-3">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                    <Menu className="w-8 h-8 text-primary" />
+              <div className="flex items-center justify-center h-full min-h-[500px]">
+                <div className="text-center space-y-4 max-w-sm">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-surface-container-high flex items-center justify-center">
+                    <MessageSquare className="w-10 h-10 text-on-surface-variant" />
                   </div>
-                  <div>
-                    <h3 className="title-large text-on-surface">No messages yet</h3>
-                    <p className="body-medium text-on-surface-variant mt-2">
+                  <div className="space-y-2">
+                    <h3 className="headline-small text-on-surface">No messages yet</h3>
+                    <p className="body-large text-on-surface-variant">
                       Start a conversation in {getLanguageName(selectedLanguage)}
                     </p>
                   </div>
@@ -209,31 +209,35 @@ export default function ChatPage() {
 
         {/* Audio Recorder (when active) */}
         {isRecording && (
-          <div className="elevation-2 border-t border-outline-variant p-4">
-            <AudioRecorder
-              isRecording={isRecording}
-              isPaused={isPaused}
-              onStart={startVoiceInput}
-              onPause={pauseVoiceInput}
-              onResume={resumeVoiceInput}
-              onStop={stopVoiceInput}
-              onCancel={cancelVoiceInput}
-              language={getLanguageName(selectedLanguage)}
-              audioLevel={audioLevel}
-            />
+          <div className="bg-surface-container border-t border-outline-variant px-6 py-4">
+            <div className="max-w-5xl mx-auto">
+              <AudioRecorder
+                isRecording={isRecording}
+                isPaused={isPaused}
+                onStart={startVoiceInput}
+                onPause={pauseVoiceInput}
+                onResume={resumeVoiceInput}
+                onStop={stopVoiceInput}
+                onCancel={cancelVoiceInput}
+                language={getLanguageName(selectedLanguage)}
+                audioLevel={audioLevel}
+              />
+            </div>
           </div>
         )}
 
         {/* Message Input */}
-        <div className="elevation-2 border-t border-outline-variant">
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            onStartVoiceInput={startVoiceInput}
-            onStopVoiceInput={stopVoiceInput}
-            isRecording={isRecording}
-            placeholder={`Type a message in ${getLanguageName(selectedLanguage)}...`}
-            onTyping={notifyTyping}
-          />
+        <div className="bg-surface border-t border-outline-variant">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <MessageInput
+              onSendMessage={handleSendMessage}
+              onStartVoiceInput={startVoiceInput}
+              onStopVoiceInput={stopVoiceInput}
+              isRecording={isRecording}
+              placeholder={`Type a message in ${getLanguageName(selectedLanguage)}...`}
+              onTyping={notifyTyping}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -303,18 +303,26 @@ export function AppSidebar({ isOpen = true, onToggle }: AppSidebarProps) {
         })}
       </nav>
 
-      {/* Footer Actions */}
-      <div className="p-3 border-t border-outline-variant space-y-1">
+      {/* Footer */}
+      <div className="p-4 border-t border-outline-variant">
         <button
-          onClick={() => setLocation("/settings")}
+          onClick={toggleTheme}
           className={cn(
             "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-highest transition-colors",
             isCollapsed && "justify-center"
           )}
-          data-testid="nav-settings-footer"
+          data-testid="button-theme-toggle"
         >
-          <Settings className="w-5 h-5" />
-          {!isCollapsed && <span className="label-large">Settings</span>}
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5" />
+          ) : (
+            <Moon className="w-5 h-5" />
+          )}
+          {!isCollapsed && (
+            <span className="label-large">
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </span>
+          )}
         </button>
       </div>
     </aside>

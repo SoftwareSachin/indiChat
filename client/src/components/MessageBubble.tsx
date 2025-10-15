@@ -27,48 +27,53 @@ export function MessageBubble({
   userName,
 }: MessageBubbleProps) {
   return (
-    <div className={cn("flex gap-2 max-w-[85%] md:max-w-md", isSent ? "ml-auto" : "mr-auto")}>
-      <div className={cn("flex flex-col gap-2", isSent ? "items-end" : "items-start")}>
+    <div className={cn("flex gap-3 max-w-[90%] md:max-w-2xl", isSent ? "ml-auto" : "mr-auto")}>
+      <div className={cn("flex flex-col gap-1.5 w-full", isSent ? "items-end" : "items-start")}>
         {!isSent && userName && (
-          <span className="label-small text-on-surface-variant px-3">{userName}</span>
+          <span className="label-medium text-on-surface-variant px-4">{userName}</span>
         )}
         
         <div
           className={cn(
-            "rounded-2xl px-4 py-3 space-y-3 shadow-sm",
+            "rounded-3xl px-5 py-3.5 space-y-2.5",
             isSent
-              ? "bg-primary text-primary-foreground rounded-br-sm"
-              : "bg-surface-container-high text-on-surface dark:bg-surface-container-high dark:text-on-surface rounded-bl-sm"
+              ? "bg-primary text-primary-foreground rounded-br-md shadow-md"
+              : "bg-surface text-on-surface dark:bg-surface dark:text-on-surface rounded-bl-md border border-outline-variant"
           )}
           data-testid={`message-bubble-${isSent ? 'sent' : 'received'}`}
         >
           {translatedFrom && (
             <Badge 
               variant="secondary" 
-              className="label-small bg-surface-container text-on-surface-variant border-outline-variant"
+              className={cn(
+                "label-small border",
+                isSent 
+                  ? "bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20"
+                  : "bg-surface-container text-on-surface-variant border-outline-variant"
+              )}
             >
               Translated from {translatedFrom}
             </Badge>
           )}
           
-          <p className="body-large leading-relaxed break-words">{content}</p>
+          <p className="body-large leading-relaxed break-words whitespace-pre-wrap">{content}</p>
           
-          <div className="flex items-center gap-3 justify-between">
+          <div className="flex items-center gap-3 justify-between pt-1">
             <span className={cn(
               "label-small",
-              isSent ? "text-primary-foreground/70" : "text-on-surface-variant"
+              isSent ? "text-primary-foreground/80" : "text-on-surface-variant"
             )}>
               {timestamp}
             </span>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {onPlayAudio && (
                 <Button
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-7 w-7 icon-button",
-                    isSent ? "text-primary-foreground" : "text-on-surface"
+                    "h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors",
+                    isSent ? "text-primary-foreground hover:text-primary-foreground" : "text-on-surface hover:text-on-surface"
                   )}
                   onClick={onPlayAudio}
                   data-testid="button-play-audio"
@@ -78,10 +83,10 @@ export function MessageBubble({
               )}
               
               {isSent && (
-                <span className="flex items-center">
-                  {status === 'sending' && <Clock className="h-4 w-4 opacity-70" />}
-                  {status === 'sent' && <Check className="h-4 w-4 opacity-70" />}
-                  {status === 'delivered' && <CheckCheck className="h-4 w-4 opacity-70" />}
+                <span className="flex items-center text-primary-foreground/80">
+                  {status === 'sending' && <Clock className="h-4 w-4" />}
+                  {status === 'sent' && <Check className="h-4 w-4" />}
+                  {status === 'delivered' && <CheckCheck className="h-4 w-4" />}
                   {status === 'failed' && <AlertCircle className="h-4 w-4 text-error" />}
                 </span>
               )}
