@@ -38,7 +38,7 @@ export function MessageInput({
   };
 
   return (
-    <div className="flex items-end gap-2 p-4 border-t bg-card">
+    <div className="flex items-end gap-2">
       <div className="flex-1 relative">
         <Textarea
           value={message}
@@ -48,7 +48,7 @@ export function MessageInput({
           }}
           onKeyDown={handleKeyPress}
           placeholder={placeholder}
-          className="resize-none min-h-[52px] max-h-32 pr-12"
+          className="resize-none min-h-[48px] max-h-32 rounded-xl text-base bg-surface-container dark:bg-surface-container-high border-outline-variant"
           rows={1}
           data-testid="input-message"
         />
@@ -56,12 +56,12 @@ export function MessageInput({
 
       {onStartVoiceInput && onStopVoiceInput && (
         <Button
-          variant={isRecording ? "default" : "ghost"}
+          variant={isRecording ? "default" : "outline"}
           size="icon"
           onClick={isRecording ? onStopVoiceInput : onStartVoiceInput}
           data-testid="button-voice-input"
           className={cn(
-            "transition-all",
+            "h-12 w-12 rounded-xl shrink-0",
             isRecording && "animate-pulse"
           )}
         >
@@ -77,6 +77,7 @@ export function MessageInput({
         onClick={handleSend}
         disabled={!message.trim()}
         size="icon"
+        className="h-12 w-12 rounded-xl shrink-0"
         data-testid="button-send-message"
       >
         <Send className="h-5 w-5" />

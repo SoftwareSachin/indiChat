@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { MessageSquare, User, Lock, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,131 +67,143 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-8">
-        {/* Brand Header */}
-        <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-            <MessageSquare className="w-9 h-9 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="headline-large text-on-background">Xchat</h1>
-            <p className="body-large text-on-surface-variant mt-2">
+      <div className="w-full max-w-[440px]">
+        <div className="space-y-8">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 dark:bg-primary/20 mb-2">
+              <svg 
+                className="w-7 h-7 text-primary" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+                />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-on-background">
+              XChat
+            </h1>
+            <p className="text-sm text-on-surface-variant">
               Global Multilingual Communication
             </p>
           </div>
-        </div>
 
-        {/* Auth Card */}
-        <div className="card-outlined p-8 space-y-6">
-          <div className="space-y-2">
-            <h2 className="title-large text-on-surface">
-              {isLogin ? "Sign in to your account" : "Create your account"}
-            </h2>
-            <p className="body-medium text-on-surface-variant">
-              {isLogin 
-                ? "Enter your credentials to access your chat rooms" 
-                : "Join the global conversation with real-time translation"}
-            </p>
-          </div>
-
-          {!isLogin && (
-            <div className="surface-container-high rounded-xl p-4">
-              <p className="body-small text-on-surface-variant">
-                <strong className="text-on-surface">Note:</strong> Multiple accounts in the same browser will share the same session. For testing with multiple users, use different browsers or incognito windows.
+          <div className="bg-surface dark:bg-surface border border-outline-variant rounded-2xl p-8 space-y-6 shadow-sm">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-on-surface">
+                {isLogin ? "Sign in to your account" : "Create your account"}
+              </h2>
+              <p className="text-sm text-on-surface-variant">
+                {isLogin 
+                  ? "Enter your credentials to access your chat rooms" 
+                  : "Join the global conversation with real-time translation"}
               </p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="label-large text-on-surface flex items-center gap-2">
-                <User className="w-4 h-4" />
-                Username
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-                required
-                autoComplete="username"
-                className="body-large h-12"
-                data-testid="input-username"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password" className="label-large text-on-surface flex items-center gap-2">
-                <Lock className="w-4 h-4" />
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                autoComplete={isLogin ? "current-password" : "new-password"}
-                className="body-large h-12"
-                data-testid="input-password"
-              />
             </div>
 
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="language" className="label-large text-on-surface flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  Preferred Language
-                </Label>
-                <Select value={preferredLanguage} onValueChange={(value) => setPreferredLanguage(value as LanguageCode)}>
-                  <SelectTrigger id="language" className="body-large h-12" data-testid="select-language">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUPPORTED_LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.code} value={lang.code}>
-                        {lang.name} ({lang.nativeName})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  <span className="font-medium text-on-surface">Note:</span> Multiple accounts in the same browser will share the same session. For testing with multiple users, use different browsers or incognito windows.
+                </p>
               </div>
             )}
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-12 btn-filled label-large"
-              data-testid="button-submit"
-            >
-              {isLoading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
-            </Button>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium text-on-surface">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  required
+                  autoComplete="username"
+                  className="h-11 text-base"
+                  data-testid="input-username"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-on-surface">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  className="h-11 text-base"
+                  data-testid="input-password"
+                />
+              </div>
 
-          <div className="divider"></div>
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="language" className="text-sm font-medium text-on-surface">
+                    Preferred Language
+                  </Label>
+                  <Select value={preferredLanguage} onValueChange={(value) => setPreferredLanguage(value as LanguageCode)}>
+                    <SelectTrigger id="language" className="h-11 text-base" data-testid="select-language">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUPPORTED_LANGUAGES.map((lang) => (
+                        <SelectItem key={lang.code} value={lang.code}>
+                          {lang.name} ({lang.nativeName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-11 text-base font-medium"
+                data-testid="button-submit"
+              >
+                {isLoading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-outline-variant"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-surface dark:bg-surface px-2 text-on-surface-variant">Or</span>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm font-medium text-primary hover:underline underline-offset-4"
+                data-testid="button-toggle-mode"
+              >
+                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              </button>
+            </div>
+          </div>
 
           <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="label-large text-primary hover:underline"
-              data-testid="button-toggle-mode"
-            >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-            </button>
+            <p className="text-xs text-on-surface-variant">
+              Supports 12 Indian regional languages
+            </p>
           </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="text-center space-y-2">
-          <p className="body-small text-on-surface-variant">
-            Supports 12 Indian regional languages
-          </p>
-          <p className="body-small text-on-surface-variant">
-            Real-time AI translation powered by Google Gemini
-          </p>
         </div>
       </div>
     </div>

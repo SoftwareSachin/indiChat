@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
 import { useChat } from "@/hooks/useChat";
 import { type LanguageCode, getLanguageName } from "@/lib/languages";
-import { ArrowLeft, Menu, MessageSquare } from "lucide-react";
+import { ArrowLeft, Menu } from "lucide-react";
 import { AuthManager } from "@/lib/auth-manager";
 import { useToast } from "@/hooks/use-toast";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -113,7 +113,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar for mobile */}
       {showSidebar && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowSidebar(false)} />
@@ -123,21 +122,18 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Sidebar for desktop */}
       <div className="hidden lg:block">
         <AppSidebar />
       </div>
 
-      {/* Chat Container */}
       <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <div className="bg-surface border-b border-outline-variant">
-          <div className="flex items-center gap-2 px-3 py-4">
+        <div className="bg-surface dark:bg-surface border-b border-outline-variant">
+          <div className="flex items-center gap-2 px-4 py-3.5">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => setLocation("/rooms")}
-              className="icon-button lg:hidden"
+              className="h-9 w-9 lg:hidden"
               data-testid="button-back"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -146,7 +142,7 @@ export default function ChatPage() {
               variant="ghost"
               size="icon"
               onClick={() => setShowSidebar(true)}
-              className="icon-button lg:hidden"
+              className="h-9 w-9 lg:hidden"
               data-testid="button-menu"
             >
               <Menu className="w-5 h-5" />
@@ -161,18 +157,29 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Messages Area */}
-        <ScrollArea className="flex-1 bg-surface-container-low">
-          <div ref={scrollRef} className="p-6 space-y-6 max-w-5xl mx-auto">
+        <ScrollArea className="flex-1 bg-background dark:bg-background">
+          <div ref={scrollRef} className="p-4 md:p-6 space-y-4 max-w-5xl mx-auto">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full min-h-[500px]">
                 <div className="text-center space-y-4 max-w-sm">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-surface-container-high flex items-center justify-center">
-                    <MessageSquare className="w-10 h-10 text-on-surface-variant" />
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-surface dark:bg-surface-container flex items-center justify-center border border-outline-variant">
+                    <svg 
+                      className="w-8 h-8 text-on-surface-variant" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+                      />
+                    </svg>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="headline-small text-on-surface">No messages yet</h3>
-                    <p className="body-large text-on-surface-variant">
+                    <h3 className="text-xl font-semibold text-on-surface">No messages yet</h3>
+                    <p className="text-sm text-on-surface-variant">
                       Start a conversation in {getLanguageName(selectedLanguage)}
                     </p>
                   </div>
@@ -207,9 +214,8 @@ export default function ChatPage() {
           </div>
         </ScrollArea>
 
-        {/* Audio Recorder (when active) */}
         {isRecording && (
-          <div className="bg-surface-container border-t border-outline-variant px-6 py-4">
+          <div className="bg-surface dark:bg-surface-container border-t border-outline-variant px-4 md:px-6 py-4">
             <div className="max-w-5xl mx-auto">
               <AudioRecorder
                 isRecording={isRecording}
@@ -226,9 +232,8 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Message Input */}
-        <div className="bg-surface border-t border-outline-variant">
-          <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="bg-surface dark:bg-surface border-t border-outline-variant">
+          <div className="max-w-5xl mx-auto px-4 md:px-6 py-3.5">
             <MessageInput
               onSendMessage={handleSendMessage}
               onStartVoiceInput={startVoiceInput}

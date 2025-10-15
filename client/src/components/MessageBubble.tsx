@@ -27,41 +27,41 @@ export function MessageBubble({
   userName,
 }: MessageBubbleProps) {
   return (
-    <div className={cn("flex gap-3 max-w-[90%] md:max-w-2xl", isSent ? "ml-auto" : "mr-auto")}>
+    <div className={cn("flex gap-3 max-w-[85%] md:max-w-2xl", isSent ? "ml-auto" : "mr-auto")}>
       <div className={cn("flex flex-col gap-1.5 w-full", isSent ? "items-end" : "items-start")}>
         {!isSent && userName && (
-          <span className="label-medium text-on-surface-variant px-4">{userName}</span>
+          <span className="text-xs font-medium text-on-surface-variant px-4">{userName}</span>
         )}
         
         <div
           className={cn(
-            "rounded-3xl px-5 py-3.5 space-y-2.5",
+            "rounded-2xl px-4 py-3 space-y-2 shadow-sm",
             isSent
-              ? "bg-primary text-primary-foreground rounded-br-md shadow-md"
-              : "bg-surface text-on-surface dark:bg-surface dark:text-on-surface rounded-bl-md border border-outline-variant"
+              ? "bg-primary text-primary-foreground rounded-br-sm"
+              : "bg-surface dark:bg-surface-container text-on-surface dark:text-on-surface rounded-bl-sm border border-outline-variant"
           )}
           data-testid={`message-bubble-${isSent ? 'sent' : 'received'}`}
         >
           {translatedFrom && (
             <Badge 
-              variant="secondary" 
+              variant="outline" 
               className={cn(
-                "label-small border",
+                "text-[10px] font-normal h-5 px-2",
                 isSent 
                   ? "bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20"
-                  : "bg-surface-container text-on-surface-variant border-outline-variant"
+                  : "bg-surface-container-high dark:bg-surface-container text-on-surface-variant border-outline-variant"
               )}
             >
               Translated from {translatedFrom}
             </Badge>
           )}
           
-          <p className="body-large leading-relaxed break-words whitespace-pre-wrap">{content}</p>
+          <p className="text-[15px] leading-relaxed break-words whitespace-pre-wrap">{content}</p>
           
-          <div className="flex items-center gap-3 justify-between pt-1">
+          <div className="flex items-center gap-3 justify-between pt-0.5">
             <span className={cn(
-              "label-small",
-              isSent ? "text-primary-foreground/80" : "text-on-surface-variant"
+              "text-[11px]",
+              isSent ? "text-primary-foreground/70" : "text-on-surface-variant"
             )}>
               {timestamp}
             </span>
@@ -71,23 +71,25 @@ export function MessageBubble({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={cn(
-                    "h-8 w-8 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors",
-                    isSent ? "text-primary-foreground hover:text-primary-foreground" : "text-on-surface hover:text-on-surface"
-                  )}
                   onClick={onPlayAudio}
+                  className={cn(
+                    "h-7 w-7 rounded-full",
+                    isSent 
+                      ? "hover:bg-primary-foreground/10 text-primary-foreground/80 hover:text-primary-foreground"
+                      : "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                  )}
                   data-testid="button-play-audio"
                 >
-                  <Volume2 className="h-4 w-4" />
+                  <Volume2 className="h-3.5 w-3.5" />
                 </Button>
               )}
               
               {isSent && (
-                <span className="flex items-center text-primary-foreground/80">
-                  {status === 'sending' && <Clock className="h-4 w-4" />}
-                  {status === 'sent' && <Check className="h-4 w-4" />}
-                  {status === 'delivered' && <CheckCheck className="h-4 w-4" />}
-                  {status === 'failed' && <AlertCircle className="h-4 w-4 text-error" />}
+                <span className="flex items-center">
+                  {status === 'sending' && <Clock className="h-3.5 w-3.5 text-primary-foreground/70" />}
+                  {status === 'sent' && <Check className="h-3.5 w-3.5 text-primary-foreground/70" />}
+                  {status === 'delivered' && <CheckCheck className="h-3.5 w-3.5 text-primary-foreground/70" />}
+                  {status === 'failed' && <AlertCircle className="h-3.5 w-3.5 text-error" />}
                 </span>
               )}
             </div>
